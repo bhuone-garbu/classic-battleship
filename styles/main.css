@@ -1,4 +1,32 @@
+* {
+  box-sizing: border-box;
+}
+
 body {
-  background-color: black;
-  color: whitesmoke;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0 auto;
+}
+
+.player-grid, .bot-grid {
+  display: flex;
+  align-items: center;
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+  flex-wrap: wrap;
+  height: 100%;
+  justify-content: center;
+  height: 500px;
+  width: 500px;
+  margin: 10px;
+}
+
+.player-grid div, .bot-grid div {
+  border: 1px solid;
+  flex-grow: 0;
+  height: 10%;
+  width: 10%;
+  background-color: gainsboro;
 }
