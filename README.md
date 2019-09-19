@@ -1,2 +1,2 @@
-# test-js-game
+# Classic Battleship
 JS Game for fun
