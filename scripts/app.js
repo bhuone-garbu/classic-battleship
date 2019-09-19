@@ -1,50 +1,121 @@
+
 const FLEETS = ['destroyer', 'submarine', 'battleship', 'carrier']
+
 const DEFAULT_GRID_COLOR = 'default-grid-color'
+const GRID_HOVER = 'grid-hightlight'
 
 
-const calculateCoordinates = (gridIndex, width) => {
-  // return x and y coordinate
-  return [ gridIndex % width, Math.floor(gridIndex / width) ]
+// utility functions for returning x and y coordinate from index and vice versa
+const getXYCoordinatesFromIndex = (gridIndex, boardWidth) => [gridIndex % boardWidth, Math.floor(gridIndex / boardWidth)]
+
+const getIndexFromXYCoordinates = (x, y, boardWidth) => y * boardWidth + x
+
+
+/*
+// coordinates should be checked before doing anything to it
+function isIndexValid(calculatedIndex, boardWidth) {
+  return calculatedIndex >= 0 && calculatedIndex < boardWidth ** 2
+}
+*/
+
+
+// We always want to return valid coordinates no matter what the size of the ship and no matter where the users hovers over the
+// the grid
+function validRelativeCoordinates(currentDivIndex, boardWidth, size, horizontal = true) {
+  const xyCoord = getXYCoordinatesFromIndex(currentDivIndex, boardWidth)
+
+  const arrayWidth = boardWidth
+
+  // calculate the how "off" the coordinate is given we take the size of the ship into account
+  const offset = horizontal ? arrayWidth - (xyCoord[0] + size) : arrayWidth - (xyCoord[1] + size)
+
+  // the idea is to return back the current xyCoord if we are okay else reset back to the last coordinate using the offset
+  let indexToReturn
+  if (horizontal) {
+    indexToReturn = offset < 0 ? [xyCoord[0] - Math.abs(offset), xyCoord[1]] : xyCoord
+  } else {
+    indexToReturn = offset < 0 ? [xyCoord[0], xyCoord[1] - Math.abs(offset)] : xyCoord
+  }
+  return indexToReturn
+
 }
 
-const getIndexFromCoordinates = (x, y, width) => {
-  return y * width + x
+
+// this is for player1
+function handleFleetPlacement(cellDiv, playerDivs, boardWidth, ship, horizontal = true) {
+
+  const indexCoordinates = []
+
+  cellDiv.addEventListener('mouseover', ()  => {
+    const cellDivIndex = playerDivs.indexOf(cellDiv)
+    // let currentCoords = getXYCoordinatesFromIndex(cellDivIndex, boardWidth)
+    const currentCoords = validRelativeCoordinates(cellDivIndex, boardWidth, ship.size, horizontal)
+
+    for (let i = 0; i < ship.size; i++) {
+      const calculatedCoordinates = []
+      if (horizontal) {
+        calculatedCoordinates.push(currentCoords[0] + i)
+        calculatedCoordinates.push(currentCoords[1])
+      } else {
+        calculatedCoordinates.push(currentCoords[0])
+        calculatedCoordinates.push(currentCoords[1] + i)
+      }
+      const arrayIndex = getIndexFromXYCoordinates(calculatedCoordinates[0], calculatedCoordinates[1], boardWidth)
+      indexCoordinates.push(arrayIndex)
+    }
+
+    if (ship.indexCoordinates) {
+      ship.indexCoordinates.forEach(previousValidIndex => {
+        playerDivs[previousValidIndex].classList.remove(GRID_HOVER)
+      })
+    }
+
+    indexCoordinates.forEach(index => playerDivs[index].classList.add(GRID_HOVER))
+    ship.indexCoordinates = indexCoordinates
+
+  })
 }
+
 
 
 class Player {
-  constructor(name = 'Player1'){
-    this.remainingFleets = FLEETS.map(fleet => fleet)
+  constructor(name = 'Player1') {
     this.name = name
+    this.remainingFleets = FLEETS.reduce((acc, feetName) => {
+      acc.push({ name: feetName })
+      return acc
+    }, [])
   }
 
-  isFeetAttacked(){
+  isFeetAttacked() {
 
   }
 
-  removeFleet(){
+  removeFleet() {
 
   }
 
-  hasNoMoreFeelRemaining(){
+  hasNoMoreFeelRemaining() {
     return this.remainingFleets.length === 0
   }
 }
 
-class Bot extends Player{
-  constructor(type){
+
+
+class Bot extends Player {
+  constructor(type) {
     super('Bot')
     this.type = type
   }
 
-  calculateNextAttactCoordinate(){
+  calculateNextAttactCoordinate() {
     return 2
   }
 }
 
 
 class Game {
-  constructor(width, player1, bot){
+  constructor(width, player1, bot) {
     this.width = width
 
     this.playerDivs = []
@@ -52,55 +123,31 @@ class Game {
 
     this.player1 = player1
     this.bot = bot
-  }
 
-  // the arrow syntax is intention to get the 'this.playerDivs' lex context
-  handleMouseOver = (e) => {
-    const currentDivIndex = this.playerDivs.indexOf(e.target)
-    const coordinates = calculateCoordinates(currentDivIndex, this.width )
-    
-    const neighbour1Index = getIndexFromCoordinates(coordinates[0], coordinates[1] - 1, this.width)
-    const neighbour2Index = getIndexFromCoordinates(coordinates[0], coordinates[1] + 1, this.width)
-
-    const neighbours = [currentDivIndex, neighbour1Index, neighbour2Index]
-    neighbours.forEach( index => {
-      if (this.isIndexValid(index)) this.playerDivs[index].classList.add('grid-hightlight')
-    })
-  }
-
-  handleMouseOut = (e) => {
-    const currentDivIndex = this.playerDivs.indexOf(e.target)
-    const coordinates = calculateCoordinates(currentDivIndex, this.width )
-    
-    const neighbour1Index = getIndexFromCoordinates(coordinates[0], coordinates[1] - 1, this.width)
-    const neighbour2Index = getIndexFromCoordinates(coordinates[0], coordinates[1] + 1, this.width)
-
-    const neighbours = [neighbour1Index, neighbour2Index]
-    neighbours.forEach( index => {
-      if (this.isIndexValid(index)) this.playerDivs[index].classList.remove('grid-hightlight')
-    })
+    this.currentDivIndex = 0
   }
 
   // utiltiy method to check if the index is within the grid array
   // coordinates should be checked before doing anything to it
-  isIndexValid(calculatedIndex){
+  isIndexValid(calculatedIndex) {
     return calculatedIndex >= 0 && calculatedIndex < this.width ** 2
   }
 
-  createGrid(){
+  createGrid() {
     const playerGridDiv = document.querySelector('.player-grid')
     const botGridDiv = document.querySelector('.bot-grid')
 
-    for (let i = 0; i < this.width ** 2; i++){
-      
+    const ship = { size: 5 }
+    for (let i = 0; i < this.width ** 2; i++) {
+
       const playerDiv = document.createElement('div')
       playerDiv.classList.add(DEFAULT_GRID_COLOR)
-      playerDiv.addEventListener('mouseover', this.handleMouseOver)
-      playerDiv.addEventListener('mouseout', this.handleMouseOut)
+
+      handleFleetPlacement(playerDiv, this.playerDivs, this.width, ship)
 
       this.playerDivs.push(playerDiv)
       playerGridDiv.appendChild(playerDiv)
-      
+
       const botDiv = document.createElement('div')
       botDiv.classList.add(DEFAULT_GRID_COLOR)
 
@@ -109,19 +156,21 @@ class Game {
     }
   }
 
-  checkGameWon(){
+  checkGameWon() {
 
   }
-
 }
 
 
+// DOM Hook
 window.addEventListener('DOMContentLoaded', () => {
 
   const player1 = new Player()
   const bot = new Bot()
-  
+
   const game = new Game(10, player1, bot)
   game.createGrid()
-  
+
 })
+
+

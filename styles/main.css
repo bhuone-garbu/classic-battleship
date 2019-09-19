@@ -3,11 +3,37 @@
 }
 
 body {
-  height: 100vh;
-  margin-top: 100px;
+  /* position: relative; */
+  background-image: url(../res/images/battleship-bg.jpg);
+  background-repeat: repeat;
+  background-size: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
 }
+/* 
+body::after {
+  background-image: url(../res/images/battleship-bg.jpg);
+  background-repeat: no-repeat;
+  background-size: 100% auto;
+  -moz-background-size: contain;
+  -webkit-background-size: contain;
+  background-size: contain;
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  opacity: 0.7;
+} */
 
-.main-container{
+.main-container {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -15,16 +41,22 @@ body {
   margin: 0 auto;
 }
 
+@media only screen and (max-width: 1100px){
+  .main-container {
+    display: block;
+  }
+}
+
 .player-grid, .bot-grid {
   display: flex;
-  align-items: center;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
   flex-wrap: wrap;
-  height: 100%;
   justify-content: center;
+  align-items: center;
   height: 500px;
   width: 500px;
-  margin: 10px;
+  margin: 10px 25px;
+  border: 2px black double;
 }
 
 .player-grid div, .bot-grid div {
@@ -35,13 +67,17 @@ body {
 }
 
 .default-grid-color {
-  background-color: gainsboro;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
-.player-grid:hover {
+.player-grid div:hover {
+  cursor: pointer;
+}
+
+.bot-grid div:hover {
   cursor: crosshair;
 }
 
 .grid-hightlight {
-  background-color: gray;
+  background-color: rgba(255, 255, 255, 0.2);
 }
