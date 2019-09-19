@@ -3,11 +3,15 @@
 }
 
 body {
+  height: 100vh;
+  margin-top: 100px;
+}
+
+.main-container{
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  height: 100vh;
   margin: 0 auto;
 }
 
@@ -28,5 +32,16 @@ body {
   flex-grow: 0;
   height: 10%;
   width: 10%;
+}
+
+.default-grid-color {
   background-color: gainsboro;
+}
+
+.player-grid:hover {
+  cursor: crosshair;
+}
+
+.grid-hightlight {
+  background-color: gray;
 }
