@@ -3,6 +3,9 @@ const FLEETS = ['destroyer', 'submarine', 'battleship', 'carrier']
 
 const DEFAULT_GRID_COLOR = 'default-grid-color'
 const GRID_HOVER = 'grid-hightlight'
+const GRID_SELECT = 'grid-select'
+
+let axis = 'H' // 'V'
 
 
 // utility functions for returning x and y coordinate from index and vice versa
@@ -21,10 +24,11 @@ function isIndexValid(calculatedIndex, boardWidth) {
 
 // We always want to return valid coordinates no matter what the size of the ship and no matter where the users hovers over the
 // the grid
-function calcRelativeCoordinates(currentDivIndex, boardWidth, size, horizontal = true) {
+function calcRelativeCoordinates(currentDivIndex, boardWidth, size) {
   const xyCoord = getXYCoordinatesFromIndex(currentDivIndex, boardWidth)
 
   const arrayWidth = boardWidth
+  const horizontal = axis === 'H'
 
   // calculate the how "off" the coordinate is given we take the size of the ship into account
   const offset = horizontal ? arrayWidth - (xyCoord[0] + size) : arrayWidth - (xyCoord[1] + size)
@@ -40,13 +44,51 @@ function calcRelativeCoordinates(currentDivIndex, boardWidth, size, horizontal =
 
 }
 
+function calcRelativeCoordinates2(currentDivIndex, boardWidth, shipSize){
+  
+  const xyCoord = getXYCoordinatesFromIndex(currentDivIndex, boardWidth)
 
-// this is for player1
+  const arrayWidth = boardWidth
+  const horizontal = axis === 'H'
+
+  // calculate the how "off" the coordinate is given we take the size of the ship into account
+  const offset = horizontal ? arrayWidth - (xyCoord[0] + shipSize) : arrayWidth - (xyCoord[1] + shipSize)
+
+  // the idea is to return back the current xyCoord if we are okay else reset back to the last coordinate using the offset
+  let currentCoords
+  if (horizontal) {
+    currentCoords = offset < 0 ? [xyCoord[0] - Math.abs(offset), xyCoord[1]] : xyCoord
+  } else {
+    currentCoords = offset < 0 ? [xyCoord[0], xyCoord[1] - Math.abs(offset)] : xyCoord
+  }
+
+  const indexCoordinates = []
+
+  for (let i = 0; i < shipSize; i++) {
+    const calculatedCoordinates = []
+    if (axis === 'H') {
+      calculatedCoordinates.push(currentCoords[0] + i)
+      calculatedCoordinates.push(currentCoords[1])
+    } else {
+      calculatedCoordinates.push(currentCoords[0])
+      calculatedCoordinates.push(currentCoords[1] + i)
+    }
+    const arrayIndex = getIndexFromXYCoordinates(calculatedCoordinates[0], calculatedCoordinates[1], boardWidth)
+    indexCoordinates.push(arrayIndex)
+  }
+
+  return indexCoordinates
+}
+
+
+
+
+// this is the hover effect
 function handleFleetPlacement(cellDiv, playerDivs, axisWidth, ship, horizontal = true) {
 
   const indexCoordinates = []
 
-  cellDiv.addEventListener('mouseover', ()  => {
+  const mouseover = function(){
     const cellDivIndex = playerDivs.indexOf(cellDiv)
     // let currentCoords = getXYCoordinatesFromIndex(cellDivIndex, boardWidth)
     const currentCoords = calcRelativeCoordinates(cellDivIndex, axisWidth, ship.size, horizontal)
@@ -72,7 +114,38 @@ function handleFleetPlacement(cellDiv, playerDivs, axisWidth, ship, horizontal =
 
     // update the ship coordinates
     ship.indexCoordinates = indexCoordinates
+
+    handleClick(cellDiv, playerDivs, indexCoordinates, ship)
+
+  }
+
+  cellDiv.addEventListener('mouseover', mouseover)
+}
+
+
+
+function handleClick(cellDiv, playerDivs, indexCoordinates, ship){
+  cellDiv.addEventListener('click', () => {
+    console.log(indexCoordinates)
+    indexCoordinates.forEach( index => {
+      playerDivs[index].classList.remove(GRID_HOVER)
+      playerDivs[index].classList.add(GRID_SELECT)
+    })
   })
+  
+}
+
+function removeMouseEvents(playerDivs) {
+  console.log('remove effect')
+  for (let i = 0; i < playerDivs.length; i++) {
+    const playerDiv = playerDivs[i]
+    playerDiv.addEventListener('mouseover', () => { 
+      return
+    } )
+    playerDiv.addEventListener('click', () => {
+      return
+    })
+  }
 }
 
 
@@ -97,6 +170,7 @@ class Player {
   hasNoMoreFeelRemaining() {
     return this.remainingFleets.length === 0
   }
+
 }
 
 
@@ -113,6 +187,8 @@ class Bot extends Player {
 }
 
 
+
+
 class Game {
   constructor(width, player1, bot) {
     this.width = width
@@ -125,7 +201,7 @@ class Game {
     this.bot = bot
 
     this.currentDivIndex = 0
-    this.ship = { size: 5 } // temp
+    //this.ships = [{ size: 5, axis: 'H' }, {sixe: 3, axis: 'V' }]// temp
   }
 
   // utiltiy method to check if the index is within the grid array
@@ -144,8 +220,6 @@ class Game {
       const playerDiv = document.createElement('div')
       playerDiv.classList.add(DEFAULT_GRID_COLOR)
 
-      this.updateMouseHover(this.ship)
-
       this.playerDivs.push(playerDiv)
       playerGridDiv.appendChild(playerDiv)
 
@@ -157,24 +231,36 @@ class Game {
     }
   }
 
-  updateMouseHover(ship){
 
-    if (!ship.axis) ship.axis = 'H'
+  addUpdateMouseHover(ship){
+
     for (let i = 0; i < this.playerDivs.length; i++) {
 
       const playerDiv = this.playerDivs[i]
-      playerDiv.classList.add(DEFAULT_GRID_COLOR)
 
-      if ( ship.axis === 'H') handleFleetPlacement(playerDiv, this.playerDivs, this.width, ship)
+      if ( axis === 'H') handleFleetPlacement(playerDiv, this.playerDivs, this.width, ship)
       else handleFleetPlacement(playerDiv, this.playerDivs, this.width, ship, false)
     }
   }
 
+  
+
   checkGameWon() {
 
   }
+
 }
 
+
+const shipSize = {
+  destroyer: 5,
+  carrier: 3,
+  submarine: 2
+}
+
+const shipCounts = 3
+
+let lastClickedButton
 
 // DOM Hook
 window.addEventListener('DOMContentLoaded', () => {
@@ -185,16 +271,73 @@ window.addEventListener('DOMContentLoaded', () => {
   const game = new Game(10, player1, bot)
   game.createGrid()
 
-
+  // game.ships.forEach( s => {
+  //   game.addUpdateMouseHover(s)
+  // })
+  
   const rotateBtn = document.getElementById('rotateBtn')
-  rotateBtn.addEventListener('click', function() {
+  rotateBtn.addEventListener('click', () => {
+    axis = axis === 'H' ? 'V' : 'H'
+  })
+  
+
+  const mouseout = function(e){
     
-    if (game.ship.axis){
-      game.ship.axis = game.ship.axis !== 'H' ? 'H' : 'V'
-    }
-    game.updateMouseHover(game.ship)
+    const shipLength = shipSize[lastClickedButton.value]
+    const cellDivIndex = game.playerDivs.indexOf(e.target)
+
+    const indexCoordinates = calcRelativeCoordinates2(cellDivIndex, game.width, shipLength)
+    indexCoordinates.forEach( index => game.playerDivs[index].classList.remove(GRID_HOVER))
+  }
+
+  const mouseclick = function(e) {
+
+    const shipLength = shipSize[lastClickedButton.value]
+    const cellDivIndex = game.playerDivs.indexOf(e.target)
+
+    const indexCoordinates = calcRelativeCoordinates2(cellDivIndex, game.width, shipLength)
+    indexCoordinates.forEach( index => {
+      game.playerDivs[index].classList.remove(GRID_HOVER)
+      game.playerDivs[index].classList.add(GRID_SELECT)
+    })
+    
+    removeEventListener()
+  }
+
+  function removeEventListener(){
+
+    game.playerDivs.forEach( div => {
+      div.removeEventListener('mouseover', mouseover)
+      div.removeEventListener('mouseout', mouseout)
+      div.removeEventListener('click', mouseclick)
+    })
+  }
+
+  const mouseover = function(e){
+    const shipLength = shipSize[lastClickedButton.value]
+    const cellDivIndex = game.playerDivs.indexOf(e.target)
+
+    const indexCoordinates = calcRelativeCoordinates2(cellDivIndex, game.width, shipLength)
+    indexCoordinates.forEach( index => game.playerDivs[index].classList.add(GRID_HOVER))
+  }
+
+  // btn.disabled = true
+  const shipButtons = document.querySelectorAll('.ships button')
+  shipButtons.forEach( btn => {
+    btn.addEventListener('click', () => {
+
+      lastClickedButton = btn
+
+      if (shipCounts === 0) return
+      // else
+      game.playerDivs.forEach( div => {
+        div.addEventListener('mouseover', mouseover)
+        div.addEventListener('mouseout', mouseout)
+        div.addEventListener('click', mouseclick)
+      })
+
+      btn.disabled = 'true'
+    })
   })
 
 })
-
-

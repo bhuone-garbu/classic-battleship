@@ -41,9 +41,9 @@ body::after {
   align-items: center;
   justify-content: space-between;
   margin: 0 auto;
-  border: 20px solid black;
+  border: 30px solid black;
   border-radius: 20px;
-  padding: 5px;
+  padding: 2px;
   height: auto;
   width: 650px;
   max-width: 70%;
@@ -67,10 +67,7 @@ body::after {
   border: 2px black double;
 }
 
-.player-grid {
-  background-image: url('../res/images/computer-screen.gif');
-  background-size: cover;
-}
+
 
 .player-grid div, .bot-grid div {
   border: 1px solid;
@@ -80,7 +77,7 @@ body::after {
 }
 
 .default-grid-color {
-  background-color: rgba(49, 143, 172, 0.5);
+  background-color: rgba(49, 143, 172, 0.3);
 }
 
 .player-grid div:hover {
@@ -91,9 +88,16 @@ body::after {
   cursor: crosshair;
 }
 
+
+/* this is the highlight for the making the hover effect */
 .grid-hightlight {
-  background-color: rgba(255, 251, 0, 0.6);
+  background-color: rgba(255, 251, 0, 0.5);
 }
+
+.grid-select {
+  background-color: rgba(255, 251, 0, 0.8);
+}
+
 
 button {
   display: block;
