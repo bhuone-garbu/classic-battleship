@@ -33,30 +33,43 @@ body::after {
   opacity: 0.7;
 } */
 
+
+
 .main-container {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   margin: 0 auto;
+  border: 20px solid black;
+  border-radius: 20px;
+  padding: 5px;
+  height: auto;
+  width: 650px;
+  max-width: 70%;
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
-@media only screen and (max-width: 1100px){
+/* @media only screen and (max-width: 1100px){
   .main-container {
     display: block;
   }
-}
+} */
 
 .player-grid, .bot-grid {
   display: flex;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.4);
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  height: 500px;
-  width: 500px;
-  margin: 10px 25px;
+  height: 400px;
+  width: 400px;
   border: 2px black double;
+}
+
+.player-grid {
+  background-image: url('../res/images/computer-screen.gif');
+  background-size: cover;
 }
 
 .player-grid div, .bot-grid div {
@@ -67,7 +80,7 @@ body::after {
 }
 
 .default-grid-color {
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(49, 143, 172, 0.5);
 }
 
 .player-grid div:hover {
@@ -79,5 +92,21 @@ body::after {
 }
 
 .grid-hightlight {
-  background-color: rgba(255, 255, 255, 0.2);
+  background-color: rgba(255, 251, 0, 0.6);
+}
+
+button {
+  display: block;
+  margin: 10px 0px;
+  height: 50px;
+  width: 80px;
+  background-color: darkcyan;
+}
+
+.controls {
+  margin: 20px;
+}
+
+.ships {
+  margin-top: 40px;
 }
