@@ -1,6 +1,10 @@
 * {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
   transition: all 0.1s ease-in;
+  margin: 0;
+  padding: 0;
 }
 
 body {
@@ -13,8 +17,6 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
-  margin: 0;
-  padding: 0;
 }
 /* 
 body::after {
@@ -36,7 +38,7 @@ body::after {
 } */
 
 .main-container {
-  flex-grow: 1;
+  flex-grow: 1;   
 }
 
 .player-container, .bot-container {
@@ -60,10 +62,15 @@ body::after {
 
 .screen {
   background-color: rgba(0, 0, 0, 0.8);
+  padding: 1px;
 }
 
+/* .radar {
+  background-image: url('../res/images/radar-animate.gif');
+  background-size: cover;
+} */
+
 .player-grid, .bot-grid {
-  padding: 0;
   margin: 0 auto;
   display: flex;
   box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.4);
@@ -72,19 +79,23 @@ body::after {
   align-items: center;
   height: 400px;
   width: 400px;
-  border: 2px black solid;
+  /* border: 2px black solid; */
   
 }
 
 
 
 .player-grid div, .bot-grid div {
-  margin: 0;
-  padding: 0;
-  border: 1px black dashed;
+  border: 3px black dotted;
   flex-grow: 0;
+  /* height: 10%;
+  width: 10%; */
+  flex-basis: 10%;
   height: 10%;
-  width: 10%;
+}
+
+.bot-grid div:hover {
+  background-color: rgba(134, 14, 14, 0.5)
 }
 
 .default-grid-color {
@@ -117,6 +128,7 @@ button {
   background-color: lightslategrey;
   border: 2px black solid;
   border-radius: 5px;
+  font-size: 1rem;
 }
 
 button:active {
