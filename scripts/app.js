@@ -69,39 +69,51 @@ function calcRelativeCoordinates(currentDivIndex, boardWidth, shipSize){
 
 // We want to list all the possible direction from the current pivot index where attack coordinate is valid
 // this is helpful for bot to tell which direction from the current index is attackableœ
-function listPossibleDirection(pivotIndex, boardWidth, usedUpCoordinates){
-
+function listPossibleDirection(pivotIndex, usedUpCoordinates, boardWidth, attackAxis){
   const xyCoordinate = getXYCoordinatesFromIndex(pivotIndex, boardWidth)
-  console.log(xyCoordinate)
-  const north = getIndexFromXYCoordinates(xyCoordinate[0], xyCoordinate[1] - 1, boardWidth)
-  const south = getIndexFromXYCoordinates(xyCoordinate[0], xyCoordinate[1] + 1, boardWidth)
-  const east = getIndexFromXYCoordinates(xyCoordinate[0] + 1, xyCoordinate[1], boardWidth)
-  const west = getIndexFromXYCoordinates(xyCoordinate[0] - 1, xyCoordinate[1], boardWidth)
+  
+  const directions = {
+    'N': getIndexFromXYCoordinates(xyCoordinate[0], xyCoordinate[1] - 1, boardWidth),
+    'S': getIndexFromXYCoordinates(xyCoordinate[0], xyCoordinate[1] + 1, boardWidth), 
+    'E': getIndexFromXYCoordinates(xyCoordinate[0] + 1, xyCoordinate[1], boardWidth),
+    'W': getIndexFromXYCoordinates(xyCoordinate[0] - 1, xyCoordinate[1], boardWidth)
+  }
 
-  if (!usedUpCoordinates) usedUpCoordinates = []
-  return [north, south, east, west].filter( coordinate => !usedUpCoordinates.includes(coordinate) && coordinate >= 0 && coordinate < boardWidth ** 2 )
+  const allowedDirections = Object.keys(directions).filter( direction => {
+    if (!attackAxis) return true // if not defined then all possible
+    if (attackAxis === 'V') return direction === 'N' || direction === 'S'
+    else return direction === 'E' || direction === 'W'
+  })
+  
+  if (!usedUpCoordinates) usedUpCoordinates = [] // initializes as empty array if empty
+
+  return Object.keys(directions).reduce( (acc, key) => {
+    const coordinate = directions[key]
+    if (!usedUpCoordinates.includes(coordinate) && allowedDirections.includes(key) && coordinate >= 0 && coordinate < boardWidth ** 2){
+      acc[key] = directions[key]
+    } return acc
+  }, {})
 }
 
 // this will determinate which direction the two indices are at - either 'x' or 'y'
-function calculateCoordinatesTrend(coordinate1, coordinate2, boardWidth){
+function calculateCoordinatesDirectionAxis(coordinate1, coordinate2, boardWidth){
+
   const xyCoordinate1 = getXYCoordinatesFromIndex(coordinate1, boardWidth)
   const xyCoordinate2 = getXYCoordinatesFromIndex(coordinate2, boardWidth)
 
   let trend = undefined
-  if (xyCoordinate1[0] - 1 === xyCoordinate2[0] || xyCoordinate1[0] + 1 === xyCoordinate2[0]) trend = 'x'
-  else if (xyCoordinate1[1] - 1 === xyCoordinate2[1] || xyCoordinate1[1] + 1 === xyCoordinate2[1]) trend = 'y'
+  if (xyCoordinate1[0] - 1 === xyCoordinate2[0] || xyCoordinate1[0] + 1 === xyCoordinate2[0]) trend = 'H' // horizontal
+  else if (xyCoordinate1[1] - 1 === xyCoordinate2[1] || xyCoordinate1[1] + 1 === xyCoordinate2[1]) trend = 'V' // vertical
   return trend
 }
 
 
-// this is for bot to provide as much info as possible about an index in order to calculate the next best possible move
-class IndexDetail {
-  constructor(indexCoordinate, boardWidth){
-    this.indexCoordinate = indexCoordinate
-    this.boardWidth = boardWidth
-  }
-  
+// an index is tight fit if its neighbour coordinates have already been used
+function isTightFit(indexCoordinate, usedUpCoordinates, boardWidth){
+  const directions = listPossibleDirection(indexCoordinate, usedUpCoordinates, boardWidth)
+  return Object.keys(directions).length === 1
 }
+
 
 
 class DeployedFleet {
@@ -136,6 +148,7 @@ class Player {
     this.name = name
     this.deployedFleets = {} //this will store 'DeployedFleet' type with the name being the key so that it's faster to access
     this.allFleetsCoordinates = []
+    this.destroyedFleets = 0
   }
 
   hasNoMoreFleetRemaining() {
@@ -164,26 +177,66 @@ class Player {
 
 
 class Bot extends Player {
-  constructor(totalGridSize) {
+  constructor(width) {
     super('Bot')
     //this.type = type
-    this.totalGridSize = totalGridSize
-    this.attackedVectors = [] //histories of all the coordinates used by the bot
-    this.lastSuccessfulAttack = null
+    this.width = width
+    this.totalGridSize = this.width ** 2
+    this.allAttackedVectors = [] //histories of all the coordinates used/attacked by the bot
+
+    // this is not the same as attacked vectors but rather for a fleet that was spotted during the attack
+    this.lastSuccessfulAttacks = []
+    this.attackAxis = undefined
+  }
+
+  randomAttack(){
+    let nextBestVector = Math.floor(Math.random() * this.totalGridSize)
+    // keep generating if it has already been used before or if the coordinate is tight fit
+    while (this.allAttackedVectors.includes(nextBestVector) || isTightFit(nextBestVector, this.allAttackedVectors, this.width)) {
+      nextBestVector = Math.floor(Math.random() * this.totalGridSize)
+    }
+    return nextBestVector
+  }
+
+  calculateSuitableAttackCoordinate(previousAttackedCoords, usedUpCoordinates, boardWidth, attackAxis){
+    const attackSize = previousAttackedCoords.length // successful attack length size
+    if (!previousAttackedCoords || attackSize === 0) return
+  
+    const directions = listPossibleDirection(previousAttackedCoords[attackSize - 1], usedUpCoordinates, boardWidth, attackAxis)
+    const keys = Object.keys(directions)
+    if (keys.length > 0){
+      const k = keys.length > 1 ? keys[Math.floor(Math.random() * keys.length)] : keys[0]
+      return directions[k]
+    }
+  
+    // else reverse and try again to try from a different end pivot
+    return this.calculateSuitableAttackCoordinate(previousAttackedCoords.reverse(), usedUpCoordinates, boardWidth, attackAxis)
+  }
+
+  resetAttackTactics(){
+    this.lastSuccessfulAttacks = []
+    this.attackAxis = undefined
   }
 
   calculateNextAttackVector() {
-    let nextBestVector = Math.floor(Math.random() * this.totalGridSize)
-    while (this.attackedVectors.includes(nextBestVector)) {
-      nextBestVector = Math.floor(Math.random() * this.totalGridSize)
+
+    console.log('this.lastSuccessfulAttacks::', this.lastSuccessfulAttacks)
+    const calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks, this.allAttackedVectors, this.width, this.attackAxis)
+    if (calcVector){
+      console.log('Using calc vector::: ' + calcVector)
+      return calcVector
     }
-    this.attackedVectors.push(nextBestVector)
-    return nextBestVector
+    const random = this.randomAttack()
+    console.log('Using random::: ', random)
+    return random
   }
 
   storeLastSuccessfulAttack(hitIndex){
     console.log('storing successful attack')
-    this.lastSuccessfulAttack = hitIndex
+    this.lastSuccessfulAttacks.push(hitIndex)
+    if (!this.attackAxis && this.lastSuccessfulAttacks.length > 1) {
+      this.attackAxis = calculateCoordinatesDirectionAxis(this.lastSuccessfulAttacks[0], this.lastSuccessfulAttacks[1], this.width)
+    }
   }
 
 
@@ -229,7 +282,7 @@ class Game {
     this.botDivs = []
 
     this.humanPlayer = new Player()
-    this.bot = new Bot(this.width * this.height)
+    this.bot = new Bot(this.width)
 
     this.attackBot = true // true means it's human's turn and to attack the bot, false is otherwise
     //this.usedCoordinates = []
@@ -265,7 +318,7 @@ class Game {
     const grids = this.attackBot ? this.botDivs : this.playerDivs
     const player = this.attackBot ? this.bot : this.humanPlayer
     const indexCoordinate = parseInt(e.target.getAttribute('index'))
-    console.log('indexCoordinate', indexCoordinate)
+    
     if (this.checkAndMarkFleetHit(indexCoordinate, this.attackBot)){
       console.log(player.reportAllDestroyedFleets())
     }
@@ -273,23 +326,36 @@ class Game {
     // once clicked/attacked - we don't want to be able to clickable until the bot have attacked the human players as well
     grids.forEach( grid => grid.removeEventListener('click', this.attackableClickEvent ))
     this.checkGameEnded()
-    this.letBotAttackHuman()
+    if (!this.gameEnded) {
+      this.letBotAttackHuman()
+    }
     
   }
 
   letBotAttackHuman(){
-    if (!this.gameEnded) {
-      console.log('Bot about to attack in 1 seconds')
-      setTimeout(() => {
-        const botAttackVector = this.bot.calculateNextAttackVector()
-        console.log('botAttackVector', botAttackVector)
-        if (this.checkAndMarkFleetHit(botAttackVector, false)){
-          this.bot.storeLastSuccessfulAttack(botAttackVector)
-        } 
-        this.checkGameEnded()
-        this.addAttackableClickEventsForPlayerGrids()
-      }, 1000)
-    }
+    
+    console.log('\n\nBot about to attack in 1 seconds')
+    setTimeout(() => {
+      const botAttackVector = this.bot.calculateNextAttackVector()
+      const lastDesttoyedCount = this.humanPlayer.destroyedFleets
+      console.log('allAttackedVectors', this.bot.allAttackedVectors)
+      console.log('lastDestroyedFleets count', this.humanPlayer.destroyedFleets)
+      console.log('botAttackVector', botAttackVector)
+      console.log('Pushing ', botAttackVector, ' in all attacked vectors')
+      this.bot.allAttackedVectors.push(botAttackVector)
+      
+
+      if (this.checkAndMarkFleetHit(botAttackVector, false)){
+        this.bot.storeLastSuccessfulAttack(botAttackVector)
+        if (this.humanPlayer.destroyedFleets > lastDesttoyedCount){
+          this.bot.resetAttackTactics() //reset after destroying
+          console.log('resetting')
+        }
+      }
+      this.checkGameEnded()
+      this.addAttackableClickEventsForPlayerGrids()
+    }, 1000)
+    
   }
 
   
@@ -297,7 +363,7 @@ class Game {
   addAttackableClickEventsForPlayerGrids(isBot = true) {
     const grids = isBot ? this.botDivs : this.playerDivs
     if (!this.gameEnded) {
-      grids.forEach( grid => grid.addEventListener('click', this.attackableClickEvent ))
+      grids.forEach(grid => grid.addEventListener('click', this.attackableClickEvent))
     }
   }
 
@@ -312,18 +378,27 @@ class Game {
     let hitSuccessful = false
     for (const fleetName in player.deployedFleets) {
       if (player.deployedFleets[fleetName].isIndexCoordinateMatched(indexCoordinate)) {
+
+        const stateBeforeHit = player.deployedFleets[fleetName].isDestroyed()
         player.deployedFleets[fleetName].markHit(indexCoordinate)
         grids[indexCoordinate].classList.add(CSS_FLEET_ATTACKED)
         hitSuccessful = true
+
+        // increment the destroyed ship count if it was not destroyed but after hiting it, the fleet was destroyed
+        if (!stateBeforeHit && player.deployedFleets[fleetName].isDestroyed()){
+          console.log( fleetName, ' destroyed')
+          player.destroyedFleets++
+        }
       }
     }
+
+    
     grids[indexCoordinate].classList.add(CSS_FLEET_MISSED)
     return hitSuccessful
   }
 
   deployBotFleets(){
     const deployedCoordinates = this.bot.deployFleetsRandomly(this.width)
-    console.log('deployedCoordinates', deployedCoordinates)
     deployedCoordinates.forEach( index => this.botDivs[index].classList.add(CSS_GRID_SELECT))
     this.addAttackableClickEventsForPlayerGrids(true)
   }
