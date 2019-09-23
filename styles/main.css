@@ -17,6 +17,14 @@ body {
   align-items: center;
   justify-content: center;
   min-height: 100vh;
+  font-family: 'Bree Serif', serif;
+}
+
+h1 {
+  text-transform: uppercase;
+  text-align: center;
+  font-weight: 900;
+  font-size: 2.95rem;
 }
 /* 
 body::after {
@@ -46,22 +54,40 @@ body::after {
   flex-wrap: wrap;
   align-items: center;
   /* justify-content: space-between; */
-  margin: 20px auto;
+  margin: 0 auto;
   border: 30px solid black;
   border-radius: 20px;
   height: auto;
   width: 700px;
   max-width: 80%;
+  box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.8);
 }
 
+.player-container {
+  transform: perspective(1400px) rotateX(40deg) scale(1.2) translateY(-100px);
+}
+
+.hinge {
+  border-right: 40px black solid;
+  border-left: 40px black solid;
+  height: 25px;
+  width: 200px;
+  margin: 0 auto;
+
+}
 /* @media only screen and (max-width: 1100px){
   .main-container {
     display: block;
   }
 } */
 
-.screen {
+.player-container .screen {
   background-color: rgba(0, 0, 0, 0.8);
+  padding: 1px;
+}
+
+.bot-container .screen {
+  background-color: rgba(134, 14, 14, 0.6);
   padding: 1px;
 }
 
@@ -73,29 +99,39 @@ body::after {
 .player-grid, .bot-grid {
   margin: 0 auto;
   display: flex;
-  box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.4);
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   height: 400px;
   width: 400px;
   /* border: 2px black solid; */
-  
 }
 
 
 
 .player-grid div, .bot-grid div {
   border: 3px black dotted;
-  flex-grow: 0;
+  /* flex-grow: 1; */
   /* height: 10%;
   width: 10%; */
   flex-basis: 10%;
   height: 10%;
+  width: 10%;
 }
 
 .bot-grid div:hover {
-  background-color: rgba(134, 14, 14, 0.5)
+  background-color: rgba(134, 14, 14, 0.5);
+}
+
+div.fleet-attacked {
+  background-color: rgba(134, 14, 14, 0.8);
+  background-image: url('../res/images/fire.svg')
+}
+div.fleet-missed {
+  background-color: rgba(33, 109, 128, 0.8);
+}
+div.fleet-destroyed {
+  background-image: url('../res/images/fire.svg');
 }
 
 .default-grid-color {
@@ -123,7 +159,7 @@ body::after {
 
 
 button {
-  height: 60px;
+  height: 50px;
   width: 100px;
   background-color: lightslategrey;
   border: 2px black solid;
@@ -136,8 +172,9 @@ button:active {
 }
 
 
-.controls {
+.panel {
   background-color: black;
   text-align: center;
+  min-height: 60px;
 }
 

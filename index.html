@@ -7,7 +7,7 @@
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <title>Battleship</title>
 
-  <!-- <link rel="stylesheet" type="text/css" href="styles/device-mockups.min.css"> -->
+  <link href="https://fonts.googleapis.com/css?family=Bree+Serif" rel="stylesheet">
   <link rel="stylesheet" href="styles/main.css">
   <script src="scripts/app.js"></script>
 </head>
@@ -15,29 +15,33 @@
 <body>
 
   <div class="main-container">
+    <h1>Battleship Classic Archade</h1>
+
+    <section class="bot-container">
+      <div class="panel"></div>
+      <div class="screen">
+        <div class="bot-grid"></div>
+      </div>
+      <div class="panel"></div>
+    </section>
+    <section class="hinge"></section>
     <section class="player-container">
       <div class="radar">
         <div class="screen">
           <div class="player-grid"></div>
         </div>
       </div>
-      <div class="controls">
+      <div class="panel">
         <button id="rotateBtn" disabled>Rotate</button>
-        <button id="startAttacking">Start</button>
-  
+        <button id="startAttacking" disabled>Start</button>
+
         <div class="ships">
           <button value="battleship">Battleship</button>
           <button value="destroyer">Destroyer</button>
-            <button value="carrier">Carrier</button>
-            <button value="submarine">Submarine</button>
+          <button value="carrier">Carrier</button>
+          <button value="submarine">Submarine</button>
         </div>
       </div>
-    </section>
-  
-    <section class="bot-container">
-        <div class="screen">
-          <div class="bot-grid"></div>
-        </div>
     </section>
   </div>
 
