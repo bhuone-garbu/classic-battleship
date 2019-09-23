@@ -78,12 +78,30 @@ function listPossibleDirection(pivotIndex, boardWidth, usedUpCoordinates){
   const east = getIndexFromXYCoordinates(xyCoordinate[0] + 1, xyCoordinate[1], boardWidth)
   const west = getIndexFromXYCoordinates(xyCoordinate[0] - 1, xyCoordinate[1], boardWidth)
 
-  console.log([north, south, east, west])
-
   if (!usedUpCoordinates) usedUpCoordinates = []
   return [north, south, east, west].filter( coordinate => !usedUpCoordinates.includes(coordinate) && coordinate >= 0 && coordinate < boardWidth ** 2 )
 }
 
+// this will determinate which direction the two indices are at - either 'x' or 'y'
+function calculateCoordinatesTrend(coordinate1, coordinate2, boardWidth){
+  const xyCoordinate1 = getXYCoordinatesFromIndex(coordinate1, boardWidth)
+  const xyCoordinate2 = getXYCoordinatesFromIndex(coordinate2, boardWidth)
+
+  let trend = undefined
+  if (xyCoordinate1[0] - 1 === xyCoordinate2[0] || xyCoordinate1[0] + 1 === xyCoordinate2[0]) trend = 'x'
+  else if (xyCoordinate1[1] - 1 === xyCoordinate2[1] || xyCoordinate1[1] + 1 === xyCoordinate2[1]) trend = 'y'
+  return trend
+}
+
+
+// this is for bot to provide as much info as possible about an index in order to calculate the next best possible move
+class IndexDetail {
+  constructor(indexCoordinate, boardWidth){
+    this.indexCoordinate = indexCoordinate
+    this.boardWidth = boardWidth
+  }
+  
+}
 
 
 class DeployedFleet {
@@ -114,8 +132,7 @@ class DeployedFleet {
 
 class Player {
 
-  constructor(game, name = 'Player1') {
-    this.game = game
+  constructor(name = 'Player1') {
     this.name = name
     this.deployedFleets = {} //this will store 'DeployedFleet' type with the name being the key so that it's faster to access
     this.allFleetsCoordinates = []
@@ -331,7 +348,6 @@ window.addEventListener('DOMContentLoaded', () => {
   // game
   const startButton = document.getElementById('startAttacking')
 
-  
   // remove event listener
   function clearPlayer1EventListeners(){
     game.playerDivs.forEach( div => {
@@ -353,20 +369,24 @@ window.addEventListener('DOMContentLoaded', () => {
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
 
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
-    indexCoordinates.forEach( index => {
-      game.playerDivs[index].classList.remove(CSS_GRID_HOVER)
-      game.playerDivs[index].classList.add(CSS_GRID_SELECT)
-    })
-
-    // after each click on the board we want to remove all the board hover, mouseout and click events
-    clearPlayer1EventListeners()
-
-    const fleetName = lastClickFleetButton.value
-    game.humanPlayer.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], indexCoordinates)
+    if (!indexCoordinates.some( index => game.humanPlayer.allFleetsCoordinates.includes(index))){
+      indexCoordinates.forEach( index => {
+        game.playerDivs[index].classList.remove(CSS_GRID_HOVER)
+        game.playerDivs[index].classList.add(CSS_GRID_SELECT)
+      })
+  
+      // after each successful click on the board we want to remove all the board hover, mouseout and click events
+      clearPlayer1EventListeners()
+  
+      const fleetName = lastClickFleetButton.value
+      game.humanPlayer.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], indexCoordinates)
+      game.humanPlayer.allFleetsCoordinates = game.humanPlayer.allFleetsCoordinates.concat(indexCoordinates)
+      
+      if ( --totalShipsToDeploy === 0) startButton.disabled = false
+      rotateBtn.disabled = true
+      lastClickFleetButton.disabled = true
+    }
     
-    if ( --totalShipsToDeploy === 0) startButton.disabled = false
-    rotateBtn.disabled = true
-    lastClickFleetButton.disabled = true
   }
 
   function predeployMouseover(e){
@@ -379,6 +399,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function addMouseOverOutClickEvent(){
     game.playerDivs.forEach( div => {
+      //clearPlayer1EventListeners()
       div.addEventListener('mouseover', predeployMouseover)
       div.addEventListener('mouseout', predeployMouseout)
       div.addEventListener('click', deployMouseclick)
