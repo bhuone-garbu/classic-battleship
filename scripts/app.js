@@ -172,7 +172,7 @@ class DeployedFleet {
     this.deployedCoordinates = deployedCoordinates
 
     // this is the list of attacked index coordinates that corresponds to the deployedCoordinates - initially empty
-    this.attackedCoordinates = []
+    this.hitCoordinates = []
   }
 
   isIndexCoordinateMatched(indexCoordinate){
@@ -180,11 +180,11 @@ class DeployedFleet {
   }
 
   markHit(indexCoordinate){
-    this.attackedCoordinates.push(indexCoordinate)
+    this.hitCoordinates.push(indexCoordinate)
   }
 
   isDestroyed(){
-    return this.attackedCoordinates.length === this.deployedCoordinates.length
+    return this.hitCoordinates.length === this.deployedCoordinates.length
   }
 
 }
@@ -197,6 +197,8 @@ class Player {
     this.deployedFleets = {} //this will store 'DeployedFleet' type with the name being the key so that it's faster to access
     this.allFleetsCoordinates = []
     this.destroyedFleets = 0
+
+    this.attackAttemptsCoordinates = [] // histories of all the attacks performed by other player
   }
 
   hasNoMoreFleetRemaining() {
@@ -237,19 +239,18 @@ class Bot extends Player {
     super('Bot')
     this.width = width
     this.totalGridSize = this.width ** 2
-    this.allAttackedVectors = [55, 56, 57,54,46] //histories of all the coordinates used/attacked by the bot - hit and miss both
-    this.everySuccessfulAttacks = [55,56] // histories of all successful attacks
+    
+    this.allAttackedVectors = [] //histories of all the coordinates used/attacked by the bot - hit and miss both
+    this.everySuccessfulAttacks = [] // histories of all successful attacks
+    
     this.destroyedFleetCoordinates = []   // coordinates of all the fleets that were destroyed
+
     // this is not the same as attacked vectors but a subset of successful attack to identify the axis of potential fleet
-    this.lastSuccessfulAttacks = [55,56]
+    // this could change in order to pick a strategy
+    this.lastSuccessfulAttacks = []
     this.attackAxis = 'H'
 
-    // predefined coordinates are preferred over random - this is useful when the bot gets confused or
-    // if we need to the test bot behaviour on a particular coordinates
-    this.potentialOtherShipCoordinates = []
-    this.lastRandomAttackCoordinate = undefined
     this.isBotConfused = false
-    this.needsWaitingToStart = false
   }
 
   randomAttack(){
@@ -285,30 +286,11 @@ class Bot extends Player {
     
     if (test.length > 0) this.lastSuccessfulAttacks = test
     if (test.length > 1) this.attackAxis = calculateCoordinatesDirectionAxis(this.lastSuccessfulAttacks[0], this.lastSuccessfulAttacks[1], this.width)
-    
   }
 
-  // checkAndUnlockConfusion(){
-  //   // this.attackAxis is not undefined and the bot is confused based on the previous successful attacks
-  //   if (this.isBotConfused && this.potentialOtherShipCoordinates.length > 1){
-  //     this.potentialOtherShipCoordinates = this.lastSuccessfulAttacks.splice(0)
-  //     this.resetAttackTactics()
-  //     this.lastSuccessfulAttacks = [this.potentialOtherShipCoordinates.pop()]
-  //   }
-  // }
-
-  checkForPotentialPredefinedCoordinates(){
-    if (this.lastSuccessfulAttacks.length === 0 && this.potentialOtherShipCoordinates.length > 0){
-      this.lastSuccessfulAttacks = buildAdjacentCoordinates(this.potentialOtherShipCoordinates.pop(), this.everySuccessfulAttacks, this.destroyedFleetCoordinates)
-      //this.lastSuccessfulAttacks.push(this.potentialOtherShipCoordinates.pop())
-      this.attackAxis = undefined
-      console.log('pushingg.............', this.potentialOtherShipCoordinates)
-    }
-  }
 
   calculateFromLastSuccessfulAttacks(){
 
-    // this.checkForPotentialPredefinedCoordinates()
     this.isBotConfused = false
 
     // else
@@ -326,7 +308,7 @@ class Bot extends Player {
         console.log('Retrying using calc vector::: ' + calcVector)
       }
       if (calcVector === -1){
-        console.log('Bot is seriously confused...........')
+        console.log('Bot is seriously confused...')
         this.isBotConfused = true
       }
     }
@@ -340,9 +322,6 @@ class Bot extends Player {
     if (fromLastAttacks && fromLastAttacks !== -1 ) return fromLastAttacks
 
     if (this.isBotConfused && this.attackAxis) {
-      //this.potentialOtherShipCoordinates = this.lastSuccessfulAttacks.filter( indx => !this.potentialOtherShipCoordinates.includes(indx))
-      //this.lastSuccessfulAttacks = []
-      //this.checkForPotentialPredefinedCoordinates()
       this.attackAxis = this.attackAxis === 'H' ? 'V' : 'H' // see if switch the axis makes it better
       fromLastAttacks = this.calculateFromLastSuccessfulAttacks() // try again to unlock confusion
     }
@@ -363,7 +342,6 @@ class Bot extends Player {
     }
 
     if (fromLastAttacks && fromLastAttacks !== -1 ) return fromLastAttacks
-
 
     // else fallback to random attack
     const random = this.randomAttack()
@@ -460,16 +438,19 @@ class Game {
     const grids = this.attackBot ? this.botDivs : this.playerDivs
     const player = this.attackBot ? this.bot : this.humanPlayer
     const indexCoordinate = parseInt(e.target.getAttribute('index'))
-    
-    if (this.checkAndMarkFleetHit(indexCoordinate, this.attackBot)){
-      console.log(player.reportAllDestroyedFleets())
-    }
 
-    // once clicked/attacked - we don't want to be able to clickable until the bot have attacked the human players as well
-    grids.forEach( grid => grid.removeEventListener('click', this.attackableClickEvent ))
-    this.checkGameEnded()
-    if (!this.gameEnded) {
-      this.letBotAttackHuman()
+    if (!this.bot.attackAttemptsCoordinates.includes(indexCoordinate)){
+      if (this.checkAndMarkFleetHit(indexCoordinate, this.attackBot)){
+        console.log(player.reportAllDestroyedFleets())
+      }
+  
+      // once clicked/attacked - we don't want to be able to clickable until the bot have attacked the human players as well
+      grids.forEach( grid => grid.removeEventListener('click', this.attackableClickEvent ))
+      this.checkGameEnded()
+      if (!this.gameEnded) {
+        this.letBotAttackHuman()
+      }
+
     }
     
   }
@@ -511,9 +492,12 @@ class Game {
 
 
   // check and update the CSS accordingly - if hit return true, if not return false
-  checkAndMarkFleetHit(indexCoordinate, isBot = true){
+  checkAndMarkFleetHit(indexCoordinate, isBot = true) {
     const grids = isBot ? this.botDivs : this.playerDivs
     const player = isBot ? this.bot : this.humanPlayer
+
+    // record the attack attempts coordinates on the player
+    player.attackAttemptsCoordinates.push(indexCoordinate)
     
     // remove the default highlighting classes - we will re-painting the grid again anyway
     grids[indexCoordinate].classList.remove(CSS_GRID_SELECT, CSS_DEFAULT_GRID_COLOR)
@@ -597,9 +581,6 @@ window.addEventListener('DOMContentLoaded', () => {
   
       const fleetName = lastClickFleetButton.value
       game.humanPlayer.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], indexCoordinates)
-      // REMOVE ME
-      if (fleetName === 'battleship') game.humanPlayer.deployedFleets[fleetName].attackedCoordinates = [55]
-      if (fleetName === 'carrier') game.humanPlayer.deployedFleets[fleetName].attackedCoordinates = [56]
       game.humanPlayer.allFleetsCoordinates = game.humanPlayer.allFleetsCoordinates.concat(indexCoordinates)
       
       if ( --totalShipsToDeploy === 0) startButton.disabled = false
