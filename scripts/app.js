@@ -15,6 +15,7 @@ const FLEET_SIZE_INFO = {
   destroyer: 5,
   battleship: 4,
   carrier: 3,
+  patrol: 3,
   submarine: 2
 }
 
@@ -66,6 +67,29 @@ function calcRelativeCoordinates(currentDivIndex, boardWidth, shipSize){
   return indexCoordinates
 }
 
+function buildAdjacentCoordinates(previousAttackCoordinates, filterCoordinates){
+
+  // try horizontal first
+  const filtered = previousAttackCoordinates.filter( index => !filterCoordinates || !filterCoordinates.includes(index))
+  console.log('filtered...', filtered)
+  // pick one
+  const pivotIndexCoord = getIndexFromXYCoordinates(filtered[0])
+
+  const horizontal = filtered.filter( index => getIndexFromXYCoordinates(index)[1] === pivotIndexCoord[1])
+  if (horizontal.length > 1){
+    horizontal.sort( (a,b) => a - b)
+    return horizontal
+  }
+
+  const vertical = filtered.filter( index => getIndexFromXYCoordinates(index)[0] === pivotIndexCoord[0])
+  if (vertical.length > 1){
+    vertical.sort( (a,b) => a - b)
+    return vertical
+  }
+
+  return filtered.length === 1 ? filtered : []
+
+}
 
 // We want to list all the possible direction from the current pivot index where attack coordinate is valid
 // this is helpful for bot to tell which direction from the current index is attackable
@@ -196,6 +220,13 @@ class Player {
       return destroyedFleets
     }, {} )
   }
+
+  reportAllDestroyedFleetsCoordinates(){
+    return Object.keys(this.deployedFleets).reduce( (acc, fleetName) => {
+      if (this.deployedFleets[fleetName].isDestroyed()) acc = acc.concat(this.deployedFleets[fleetName].deployedCoordinates)
+      return acc
+    }, [] )
+  }
 }
 
 
@@ -206,11 +237,19 @@ class Bot extends Player {
     super('Bot')
     this.width = width
     this.totalGridSize = this.width ** 2
-    this.allAttackedVectors = [] //histories of all the coordinates used/attacked by the bot
+    this.allAttackedVectors = [55, 56, 57,54,46] //histories of all the coordinates used/attacked by the bot - hit and miss both
+    this.everySuccessfulAttacks = [55,56] // histories of all successful attacks
+    this.destroyedFleetCoordinates = []   // coordinates of all the fleets that were destroyed
+    // this is not the same as attacked vectors but a subset of successful attack to identify the axis of potential fleet
+    this.lastSuccessfulAttacks = [55,56]
+    this.attackAxis = 'H'
 
-    // this is not the same as attacked vectors but rather for a fleet that was spotted during the attack
-    this.lastSuccessfulAttacks = []
-    this.attackAxis = undefined
+    // predefined coordinates are preferred over random - this is useful when the bot gets confused or
+    // if we need to the test bot behaviour on a particular coordinates
+    this.potentialOtherShipCoordinates = []
+    this.lastRandomAttackCoordinate = undefined
+    this.isBotConfused = false
+    this.needsWaitingToStart = false
   }
 
   randomAttack(){
@@ -225,7 +264,7 @@ class Bot extends Player {
 
   calculateSuitableAttackCoordinate(previousAttackedCoord, usedUpCoordinates, boardWidth, attackAxis){
 
-    if (!previousAttackedCoord || usedUpCoordinates.length === 0) return
+    if (!previousAttackedCoord || usedUpCoordinates.length === 0) return -1
   
     const directions = listPossibleDirection(previousAttackedCoord, usedUpCoordinates, boardWidth, attackAxis)
     const keys = Object.keys(directions)
@@ -240,25 +279,91 @@ class Bot extends Player {
 
   resetAttackTactics(){
 
+    const test = buildAdjacentCoordinates(this.everySuccessfulAttacks, this.destroyedFleetCoordinates)
     this.lastSuccessfulAttacks = []
     this.attackAxis = undefined
+    
+    if (test.length > 0) this.lastSuccessfulAttacks = test
+    if (test.length > 1) this.attackAxis = calculateCoordinatesDirectionAxis(this.lastSuccessfulAttacks[0], this.lastSuccessfulAttacks[1], this.width)
+    
   }
 
-  calculateNextAttackVector() {
+  // checkAndUnlockConfusion(){
+  //   // this.attackAxis is not undefined and the bot is confused based on the previous successful attacks
+  //   if (this.isBotConfused && this.potentialOtherShipCoordinates.length > 1){
+  //     this.potentialOtherShipCoordinates = this.lastSuccessfulAttacks.splice(0)
+  //     this.resetAttackTactics()
+  //     this.lastSuccessfulAttacks = [this.potentialOtherShipCoordinates.pop()]
+  //   }
+  // }
 
+  checkForPotentialPredefinedCoordinates(){
+    if (this.lastSuccessfulAttacks.length === 0 && this.potentialOtherShipCoordinates.length > 0){
+      this.lastSuccessfulAttacks = buildAdjacentCoordinates(this.potentialOtherShipCoordinates.pop(), this.everySuccessfulAttacks, this.destroyedFleetCoordinates)
+      //this.lastSuccessfulAttacks.push(this.potentialOtherShipCoordinates.pop())
+      this.attackAxis = undefined
+      console.log('pushingg.............', this.potentialOtherShipCoordinates)
+    }
+  }
+
+  calculateFromLastSuccessfulAttacks(){
+
+    // this.checkForPotentialPredefinedCoordinates()
+    this.isBotConfused = false
+
+    // else
     console.log('this.lastSuccessfulAttacks::', this.lastSuccessfulAttacks)
+    console.log('this.attackAxis::', this.attackAxis)
 
     const totalAttacks = this.lastSuccessfulAttacks.length
-    if (totalAttacks >= 0){
-      let calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[totalAttacks - 1], this.allAttackedVectors, this.width, this.attackAxis)
+    let calcVector
+    if (totalAttacks > 0){
+      calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[totalAttacks - 1], this.allAttackedVectors, this.width, this.attackAxis)
       console.log('Using calc vector::: ' + calcVector)
       if (calcVector && calcVector === -1){
         // try again from differnt end
         calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[0], this.allAttackedVectors, this.width, this.attackAxis)
         console.log('Retrying using calc vector::: ' + calcVector)
       }
-      if (calcVector && calcVector !== -1) return calcVector
+      if (calcVector === -1){
+        console.log('Bot is seriously confused...........')
+        this.isBotConfused = true
+      }
     }
+
+    return calcVector
+  }
+
+  calculateNextAttackVector() {
+
+    let fromLastAttacks = this.calculateFromLastSuccessfulAttacks()
+    if (fromLastAttacks && fromLastAttacks !== -1 ) return fromLastAttacks
+
+    if (this.isBotConfused && this.attackAxis) {
+      //this.potentialOtherShipCoordinates = this.lastSuccessfulAttacks.filter( indx => !this.potentialOtherShipCoordinates.includes(indx))
+      //this.lastSuccessfulAttacks = []
+      //this.checkForPotentialPredefinedCoordinates()
+      this.attackAxis = this.attackAxis === 'H' ? 'V' : 'H' // see if switch the axis makes it better
+      fromLastAttacks = this.calculateFromLastSuccessfulAttacks() // try again to unlock confusion
+    }
+
+    if (fromLastAttacks && fromLastAttacks !== -1 ) return fromLastAttacks
+
+    // let's see if there were any coordinates that was can use from
+    if (this.lastSuccessfulAttacks.length === 0){
+      const test = buildAdjacentCoordinates(this.everySuccessfulAttacks, this.destroyedFleetCoordinates)
+      if (test.length > 1) {
+        this.lastSuccessfulAttacks = test
+        this.attackAxis = calculateCoordinatesDirectionAxis(this.lastSuccessfulAttacks[0], this.lastSuccessfulAttacks[1], this.width)
+        console.log('buildAdjacentCoordinates...', this.lastSuccessfulAttacks)
+        console.log('this.destroyedFleetCoordinates...', this.destroyedFleetCoordinates)
+      }
+
+      fromLastAttacks = this.calculateFromLastSuccessfulAttacks()
+    }
+
+    if (fromLastAttacks && fromLastAttacks !== -1 ) return fromLastAttacks
+
 
     // else fallback to random attack
     const random = this.randomAttack()
@@ -270,6 +375,7 @@ class Bot extends Player {
 
     console.log('storing successful attack')
     this.lastSuccessfulAttacks.push(hitIndex)
+    this.everySuccessfulAttacks.push(hitIndex)
     if (!this.attackAxis && this.lastSuccessfulAttacks.length > 1) {
       this.attackAxis = calculateCoordinatesDirectionAxis(this.lastSuccessfulAttacks[0], this.lastSuccessfulAttacks[1], this.width)
     }
@@ -380,17 +486,17 @@ class Game {
       console.log('Pushing ', botAttackVector, ' in all attacked vectors')
       this.bot.allAttackedVectors.push(botAttackVector)
       
-
       if (this.checkAndMarkFleetHit(botAttackVector, false)){
         this.bot.storeLastSuccessfulAttack(botAttackVector)
         if (this.humanPlayer.destroyedFleets > lastDesttoyedCount){
+          this.bot.destroyedFleetCoordinates = this.humanPlayer.reportAllDestroyedFleetsCoordinates()
           this.bot.resetAttackTactics() //reset after destroying
           console.log('resetting')
         }
       }
       this.checkGameEnded()
       this.addAttackableClickEventsForPlayerGrids()
-    }, 200)
+    }, 1000)
     
   }
 
@@ -491,6 +597,9 @@ window.addEventListener('DOMContentLoaded', () => {
   
       const fleetName = lastClickFleetButton.value
       game.humanPlayer.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], indexCoordinates)
+      // REMOVE ME
+      if (fleetName === 'battleship') game.humanPlayer.deployedFleets[fleetName].attackedCoordinates = [55]
+      if (fleetName === 'carrier') game.humanPlayer.deployedFleets[fleetName].attackedCoordinates = [56]
       game.humanPlayer.allFleetsCoordinates = game.humanPlayer.allFleetsCoordinates.concat(indexCoordinates)
       
       if ( --totalShipsToDeploy === 0) startButton.disabled = false
