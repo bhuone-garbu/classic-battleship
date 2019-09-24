@@ -68,31 +68,54 @@ function calcRelativeCoordinates(currentDivIndex, boardWidth, shipSize){
 
 
 // We want to list all the possible direction from the current pivot index where attack coordinate is valid
-// this is helpful for bot to tell which direction from the current index is attackableœ
+// this is helpful for bot to tell which direction from the current index is attackable
+// TODO: tidy up the code
 function listPossibleDirection(pivotIndex, usedUpCoordinates, boardWidth, attackAxis){
+
+  if (!usedUpCoordinates) usedUpCoordinates = [] // initializes as empty array if empty - safety net!
   const xyCoordinate = getXYCoordinatesFromIndex(pivotIndex, boardWidth)
   
-  const directions = {
-    'N': getIndexFromXYCoordinates(xyCoordinate[0], xyCoordinate[1] - 1, boardWidth),
-    'S': getIndexFromXYCoordinates(xyCoordinate[0], xyCoordinate[1] + 1, boardWidth), 
-    'E': getIndexFromXYCoordinates(xyCoordinate[0] + 1, xyCoordinate[1], boardWidth),
-    'W': getIndexFromXYCoordinates(xyCoordinate[0] - 1, xyCoordinate[1], boardWidth)
-  }
-
-  const allowedDirections = Object.keys(directions).filter( direction => {
-    if (!attackAxis) return true // if not defined then all possible
-    if (attackAxis === 'V') return direction === 'N' || direction === 'S'
-    else return direction === 'E' || direction === 'W'
+  // calculate all the possible neighbour coordinates that possible taking account of the attackAxis
+  const filtered = ['N', 'S', 'E', 'W'].filter( key => {
+    if (!attackAxis){
+      return true
+    } else {
+      if (attackAxis === 'V') return key === 'N' || key === 'S'
+      else return key === 'E' || key === 'W'
+    }
   })
-  
-  if (!usedUpCoordinates) usedUpCoordinates = [] // initializes as empty array if empty
 
-  return Object.keys(directions).reduce( (acc, key) => {
-    const coordinate = directions[key]
-    if (!usedUpCoordinates.includes(coordinate) && allowedDirections.includes(key) && coordinate >= 0 && coordinate < boardWidth ** 2){
-      acc[key] = directions[key]
-    } return acc
+  // we need to further check if the coordinate has already been used and within the board size
+  return filtered.reduce((acc, key) => {
+    switch (key){
+      case 'N':
+        if (xyCoordinate[0] === getXYCoordinatesFromIndex(pivotIndex - boardWidth, boardWidth)[0]){
+          const coordinate = pivotIndex - boardWidth
+          if (!usedUpCoordinates.includes(coordinate) && coordinate >= 0 && coordinate < boardWidth ** 2) acc[key] = coordinate
+        }
+        break
+      case 'S':
+        if (xyCoordinate[0] === getXYCoordinatesFromIndex(pivotIndex + boardWidth, boardWidth)[0]){
+          const coordinate = pivotIndex + boardWidth
+          if (!usedUpCoordinates.includes(coordinate) && coordinate >= 0 && coordinate < boardWidth ** 2) acc[key] = coordinate
+        }
+        break
+      case 'E':
+        if (xyCoordinate[1] === getXYCoordinatesFromIndex(pivotIndex + 1, boardWidth)[1]){
+          const coordinate = pivotIndex + 1
+          if (!usedUpCoordinates.includes(coordinate) && coordinate >= 0 && coordinate < boardWidth ** 2) acc[key] = coordinate
+        }
+        break
+      case 'W':
+        if (xyCoordinate[1] === getXYCoordinatesFromIndex(pivotIndex - 1, boardWidth)[1]){
+          const coordinate = pivotIndex - 1
+          if (!usedUpCoordinates.includes(coordinate) && coordinate >= 0 && coordinate < boardWidth ** 2) acc[key] = coordinate
+        }
+        break
+    }
+    return acc
   }, {})
+
 }
 
 // this will determinate which direction the two indices are at - either 'x' or 'y'
@@ -102,16 +125,17 @@ function calculateCoordinatesDirectionAxis(coordinate1, coordinate2, boardWidth)
   const xyCoordinate2 = getXYCoordinatesFromIndex(coordinate2, boardWidth)
 
   let trend = undefined
-  if (xyCoordinate1[0] - 1 === xyCoordinate2[0] || xyCoordinate1[0] + 1 === xyCoordinate2[0]) trend = 'H' // horizontal
-  else if (xyCoordinate1[1] - 1 === xyCoordinate2[1] || xyCoordinate1[1] + 1 === xyCoordinate2[1]) trend = 'V' // vertical
+  if (xyCoordinate1[1] === xyCoordinate2[1]) trend = 'H' // horizontal if the y coordinates matches
+  else if (xyCoordinate1[0] === xyCoordinate2[0]) trend = 'V' // vertical if the the x coordinates matches
   return trend
 }
 
 
 // an index is tight fit if its neighbour coordinates have already been used
 function isTightFit(indexCoordinate, usedUpCoordinates, boardWidth){
+
   const directions = listPossibleDirection(indexCoordinate, usedUpCoordinates, boardWidth)
-  return Object.keys(directions).length === 1
+  return Object.keys(directions).length === 0
 }
 
 
@@ -177,9 +201,9 @@ class Player {
 
 
 class Bot extends Player {
+
   constructor(width) {
     super('Bot')
-    //this.type = type
     this.width = width
     this.totalGridSize = this.width ** 2
     this.allAttackedVectors = [] //histories of all the coordinates used/attacked by the bot
@@ -190,6 +214,7 @@ class Bot extends Player {
   }
 
   randomAttack(){
+
     let nextBestVector = Math.floor(Math.random() * this.totalGridSize)
     // keep generating if it has already been used before or if the coordinate is tight fit
     while (this.allAttackedVectors.includes(nextBestVector) || isTightFit(nextBestVector, this.allAttackedVectors, this.width)) {
@@ -198,22 +223,23 @@ class Bot extends Player {
     return nextBestVector
   }
 
-  calculateSuitableAttackCoordinate(previousAttackedCoords, usedUpCoordinates, boardWidth, attackAxis){
-    const attackSize = previousAttackedCoords.length // successful attack length size
-    if (!previousAttackedCoords || attackSize === 0) return
+  calculateSuitableAttackCoordinate(previousAttackedCoord, usedUpCoordinates, boardWidth, attackAxis){
+
+    if (!previousAttackedCoord || usedUpCoordinates.length === 0) return
   
-    const directions = listPossibleDirection(previousAttackedCoords[attackSize - 1], usedUpCoordinates, boardWidth, attackAxis)
+    const directions = listPossibleDirection(previousAttackedCoord, usedUpCoordinates, boardWidth, attackAxis)
     const keys = Object.keys(directions)
     if (keys.length > 0){
       const k = keys.length > 1 ? keys[Math.floor(Math.random() * keys.length)] : keys[0]
       return directions[k]
     }
-  
-    // else reverse and try again to try from a different end pivot
-    return this.calculateSuitableAttackCoordinate(previousAttackedCoords.reverse(), usedUpCoordinates, boardWidth, attackAxis)
+
+    // this means it failed to find a suitable coordinate from previously attacked - might be worth trying from different end of the axis
+    return -1
   }
 
   resetAttackTactics(){
+
     this.lastSuccessfulAttacks = []
     this.attackAxis = undefined
   }
@@ -221,17 +247,27 @@ class Bot extends Player {
   calculateNextAttackVector() {
 
     console.log('this.lastSuccessfulAttacks::', this.lastSuccessfulAttacks)
-    const calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks, this.allAttackedVectors, this.width, this.attackAxis)
-    if (calcVector){
+
+    const totalAttacks = this.lastSuccessfulAttacks.length
+    if (totalAttacks >= 0){
+      let calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[totalAttacks - 1], this.allAttackedVectors, this.width, this.attackAxis)
       console.log('Using calc vector::: ' + calcVector)
-      return calcVector
+      if (calcVector && calcVector === -1){
+        // try again from differnt end
+        calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[0], this.allAttackedVectors, this.width, this.attackAxis)
+        console.log('Retrying using calc vector::: ' + calcVector)
+      }
+      if (calcVector && calcVector !== -1) return calcVector
     }
+
+    // else fallback to random attack
     const random = this.randomAttack()
     console.log('Using random::: ', random)
     return random
   }
 
   storeLastSuccessfulAttack(hitIndex){
+
     console.log('storing successful attack')
     this.lastSuccessfulAttacks.push(hitIndex)
     if (!this.attackAxis && this.lastSuccessfulAttacks.length > 1) {
@@ -334,7 +370,7 @@ class Game {
 
   letBotAttackHuman(){
     
-    console.log('\n\nBot about to attack in 1 seconds')
+    console.log('\n\nBot about to attack....')
     setTimeout(() => {
       const botAttackVector = this.bot.calculateNextAttackVector()
       const lastDesttoyedCount = this.humanPlayer.destroyedFleets
@@ -354,7 +390,7 @@ class Game {
       }
       this.checkGameEnded()
       this.addAttackableClickEventsForPlayerGrids()
-    }, 1000)
+    }, 200)
     
   }
 
