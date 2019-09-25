@@ -1,6 +1,6 @@
 
 // CSS global class name constants
-const CSS_DEFAULT_GRID_COLOR = 'default-grid-color'
+// const CSS_DEFAULT_GRID_COLOR = 'default-grid-color'
 const CSS_GRID_HOVER = 'grid-hightlight'
 const CSS_GRID_SELECT = 'grid-select'
 const CSS_FLEET_ATTACKED = 'fleet-attacked'
@@ -22,7 +22,7 @@ const FLEET_SIZE_INFO = {
 // this array is the source of truth for array of 'fleet' that was used in the game
 const playableFleets = []
 
-let lastClickFleetButton
+let lastClickedFleetDiv
 
 
 // utility functions for returning x and y coordinate from index and vice versa
@@ -67,6 +67,7 @@ function calcRelativeCoordinates(currentDivIndex, boardWidth, shipSize){
   return indexCoordinates
 }
 
+// we want to create an array of adjacent coordinates from 'previousAttackCoordinates' that are in 'filterCoordinates'
 function buildAdjacentCoordinates(previousAttackCoordinates, filterCoordinates){
 
   // try horizontal first
@@ -418,14 +419,14 @@ class Game {
 
       const playerDiv = document.createElement('div')
       playerDiv.setAttribute('index', i )
-      playerDiv.classList.add(CSS_DEFAULT_GRID_COLOR)
+      //playerDiv.classList.add(CSS_DEFAULT_GRID_COLOR)
 
       this.playerDivs.push(playerDiv)
       playerGridDiv.appendChild(playerDiv)
 
       const botDiv = document.createElement('div')
       botDiv.setAttribute('index', i )
-      botDiv.classList.add(CSS_DEFAULT_GRID_COLOR)
+      //botDiv.classList.add(CSS_DEFAULT_GRID_COLOR)
 
       this.botDivs.push(botDiv)
       botGridDiv.appendChild(botDiv)
@@ -477,7 +478,7 @@ class Game {
       }
       this.checkGameEnded()
       this.addAttackableClickEventsForPlayerGrids()
-    }, 1000)
+    }, 600)
     
   }
 
@@ -500,13 +501,16 @@ class Game {
     player.attackAttemptsCoordinates.push(indexCoordinate)
     
     // remove the default highlighting classes - we will re-painting the grid again anyway
-    grids[indexCoordinate].classList.remove(CSS_GRID_SELECT, CSS_DEFAULT_GRID_COLOR)
+    // grids[indexCoordinate].classList.remove(CSS_GRID_SELECT, CSS_DEFAULT_GRID_COLOR)
+    grids[indexCoordinate].classList.remove(CSS_GRID_SELECT)
     let hitSuccessful = false
+    grids[indexCoordinate].classList.add(CSS_FLEET_MISSED)
     for (const fleetName in player.deployedFleets) {
       if (player.deployedFleets[fleetName].isIndexCoordinateMatched(indexCoordinate)) {
 
         const stateBeforeHit = player.deployedFleets[fleetName].isDestroyed()
         player.deployedFleets[fleetName].markHit(indexCoordinate)
+        grids[indexCoordinate].classList.remove(CSS_FLEET_MISSED)
         grids[indexCoordinate].classList.add(CSS_FLEET_ATTACKED)
         hitSuccessful = true
 
@@ -517,9 +521,7 @@ class Game {
         }
       }
     }
-
     
-    grids[indexCoordinate].classList.add(CSS_FLEET_MISSED)
     return hitSuccessful
   }
 
@@ -544,8 +546,10 @@ window.addEventListener('DOMContentLoaded', () => {
   game.createGrid()
 
   const rotateBtn = document.getElementById('rotateBtn')
-  const shipButtons = document.querySelectorAll('.ships button')
-  let totalShipsToDeploy = shipButtons.length
+  //const shipButtons = document.querySelectorAll('.ships button')
+
+  const humanShipDivs = document.querySelectorAll('.player-container .ships div')
+  let totalShipsToDeploy = humanShipDivs.length
   // game
   const startButton = document.getElementById('startAttacking')
 
@@ -559,14 +563,18 @@ window.addEventListener('DOMContentLoaded', () => {
   }
 
   function predeployMouseout(e){
-    const shipLength = FLEET_SIZE_INFO[lastClickFleetButton.value]
+    const shipLength = FLEET_SIZE_INFO[lastClickedFleetDiv.id]
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
-    indexCoordinates.forEach( index => game.playerDivs[index].classList.remove(CSS_GRID_HOVER))
+    indexCoordinates.forEach( index => game.playerDivs[index].classList.remove(CSS_GRID_HOVER, 'arrow-up'))
+    // if (AXIS === 'V') {
+    //   game.playerDivs[indexCoordinates[0]].innerHTML = null
+    //   // game.playerDivs[indexCoordinates[0]].classList.add('arrow-up')
+    // }
   }
   
   function deployMouseclick(e) {
-    const shipLength = FLEET_SIZE_INFO[lastClickFleetButton.value]
+    const shipLength = FLEET_SIZE_INFO[lastClickedFleetDiv.id]
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
 
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
@@ -574,31 +582,44 @@ window.addEventListener('DOMContentLoaded', () => {
       indexCoordinates.forEach( index => {
         game.playerDivs[index].classList.remove(CSS_GRID_HOVER)
         game.playerDivs[index].classList.add(CSS_GRID_SELECT)
+        
       })
+      game.playerDivs[indexCoordinates[0]].classList.add('arrow-up')
   
       // after each successful click on the board we want to remove all the board hover, mouseout and click events
       clearPlayer1EventListeners()
   
-      const fleetName = lastClickFleetButton.value
+      const fleetName = lastClickedFleetDiv.id
       game.humanPlayer.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], indexCoordinates)
       game.humanPlayer.allFleetsCoordinates = game.humanPlayer.allFleetsCoordinates.concat(indexCoordinates)
       
       if ( --totalShipsToDeploy === 0) startButton.disabled = false
       rotateBtn.disabled = true
-      lastClickFleetButton.disabled = true
+      lastClickedFleetDiv.removeEventListener('click', addMouseOverOutClickEventInGrid)
     }
     
   }
 
   function predeployMouseover(e){
-    const shipLength = FLEET_SIZE_INFO[lastClickFleetButton.value]
+    const shipLength = FLEET_SIZE_INFO[lastClickedFleetDiv.id]
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
 
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
     indexCoordinates.forEach( index => game.playerDivs[index].classList.add(CSS_GRID_HOVER))
+    // if (AXIS === 'V') {
+    //   game.playerDivs[indexCoordinates[0]].classList.remove(CSS_GRID_HOVER)
+    //   // game.playerDivs[indexCoordinates[0]].innerHTML = '&#9650;'
+    //   game.playerDivs[indexCoordinates[0]].classList.add('arrow-up')
+    // }
   }
 
-  function addMouseOverOutClickEvent(){
+  function addMouseOverOutClickEventInGrid(e){
+    if (!playableFleets.includes(e.currentTarget.id)) playableFleets.push(e.currentTarget.id)
+    // record this for later
+    lastClickedFleetDiv = e.currentTarget
+    rotateBtn.disabled = false
+    console.log('playableFleets::', playableFleets)
+    
     game.playerDivs.forEach( div => {
       //clearPlayer1EventListeners()
       div.addEventListener('mouseover', predeployMouseover)
@@ -607,16 +628,13 @@ window.addEventListener('DOMContentLoaded', () => {
     })
   }
 
+  console.log('humanShipDivs:::', humanShipDivs)
   // add event listners for ships
-  shipButtons.forEach( btn => {
-    btn.addEventListener('click', () => {
-      playableFleets.push(btn.value)
-      // record this for later
-      lastClickFleetButton = btn
-      rotateBtn.disabled = false
-      addMouseOverOutClickEvent()
-    })
+  humanShipDivs.forEach( shipDiv => {
+    console.log('individual div:::', shipDiv)
+    shipDiv.addEventListener('click', addMouseOverOutClickEventInGrid)
   })
+
   
   // rotate means we just need to switch the axis so mouseover, mouseout and click event listener will be reflected based on that
   rotateBtn.addEventListener('click', switchAxis) 

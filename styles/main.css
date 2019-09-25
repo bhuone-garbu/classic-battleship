@@ -7,6 +7,11 @@
   padding: 0;
 }
 
+@font-face {
+  font-family: 'US Navy';
+  src: url('../fonts/usnavy/usnavy.ttf');
+}
+
 body {
   /* position: relative; */
   background-image: url(../res/images/battleship-bg.jpg);
@@ -19,6 +24,7 @@ body {
   justify-content: center;
   min-height: 100vh;
   font-family: 'Bree Serif', serif;
+  color: white;
 }
 
 h1 {
@@ -35,40 +41,22 @@ header {
   width: 100%;
   margin-bottom: 20px;
 }
-/* 
-body::after {
-  background-image: url(../res/images/battleship-bg.jpg);
-  background-repeat: no-repeat;
-  background-size: 100% auto;
-  -moz-background-size: contain;
-  -webkit-background-size: contain;
-  background-size: contain;
-  content: "";
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  z-index: -1;
-  opacity: 0.7;
-} */
 
 .main-container {
-  flex-grow: 1;   
+  flex-grow: 1;
+  max-width: 90vw;
+  width: 650px;
 }
 
 .player-container, .bot-container {
-  /* display: flex; */
   flex-wrap: wrap;
   align-items: center;
-  /* justify-content: space-between; */
   margin: 0 auto;
-  border: 30px solid black;
+  border: 25px solid black;
   border-radius: 20px;
   height: auto;
   /* width: 700px; */
-  width: 90%;
+  width: 100%;
   box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.8);
 }
 
@@ -84,30 +72,11 @@ body::after {
   margin: 0 auto;
 
 }
-/* @media only screen and (max-width: 1100px){
-  .main-container {
-    display: block;
-  }
-} */
-
-/* .player-container .screen {
-  background-color: rgba(0, 0, 0, 0.8);
-  padding: 1px;
-}
-
-.bot-container .screen {
-  background-color: rgba(134, 14, 14, 0.6);
-  padding: 1px;
-} */
 .screen {
   background-color: rgba(0, 0, 0, 0.8);
-  padding: 1px;
+  text-align: center;
 }
 
-/* .radar {
-  background-image: url('../res/images/radar-animate.gif');
-  background-size: cover;
-} */
 
 .player-grid, .bot-grid {
   margin: 0 auto;
@@ -116,35 +85,48 @@ body::after {
   justify-content: center;
   align-items: center;
   max-width: 70%;
-  height: 350px;
+  /* background-color: rgba(68, 125, 143, 0.2); */
+  background-color: rgba(100, 127, 153, 0.6);
+  /* mix-blend-mode: difference; */
   /* border: 2px black solid; */
 }
+/* .player-grid {
+  background-color: rgba(68, 125, 143, 0.2);
+  mix-blend-mode: difference;
+}
+.bot-grid {
+  background-color: rgba(68, 125, 143, 0.2);
+  mix-blend-mode: difference;
+} */
 
 
 
 .player-grid div, .bot-grid div {
-  border: 3px black dotted;
-  /* flex-grow: 1; */
-  /* height: 10%;
-  width: 10%; */
+  border: 2px rgba(0, 0, 0, 0.5) solid;
+  padding: 0;
   flex-basis: 10%;
-  height: 10%;
+  height: 30px;
   width: 10%;
+  text-align: justify;
 }
+
 
 .bot-grid div:hover {
   background-color: rgba(134, 14, 14, 0.5);
 }
 
 div.fleet-attacked {
-  background-color: rgba(134, 14, 14, 0.8);
-  background-image: url('../res/images/fire.svg')
+  background-image: url('../res/images/explosion.svg');
+  background-size: 100% 100%;
 }
+
 div.fleet-missed {
-  background-color: rgba(33, 109, 128, 0.8);
+  background-image: url('../res/images/missed.svg');
+  background-size: 100% 100%;
 }
+
 div.fleet-destroyed {
-  background-image: url('../res/images/fire.svg');
+  background-image: url('../res/images/explosion.svg');
 }
 
 .default-grid-color {
@@ -166,18 +148,19 @@ div.fleet-destroyed {
   background-color: rgba(255, 251, 0, 0.5);
 }
 
+/* this is the color to confirm the placement of the ship */
 .grid-select {
   background-color: rgba(255, 251, 0, 0.8);
 }
 
 
 button {
-  height: 50px;
-  width: 100px;
-  background-color: lightslategrey;
+  width: 90px;
+  height: 40px;
+  background-color: rgb(119, 136, 153);
   border-radius: 5px;
-  font-size: 1rem;
-  box-shadow: 0 0 15px 0 rgba(255, 255, 255, 0.4);
+  font-size: 0.8rem;
+  box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.2);
   margin-bottom: 5px;
 }
 
@@ -185,10 +168,82 @@ button:active {
   transform: scale(0.95)
 }
 
+.ships {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.ships div {
+  font-family: Courier, 'Courier New', monospace;
+  font-weight: bold;
+  width: 140px;
+  background-color: rgb(100, 127, 153);
+  margin: 5px;
+  border-radius: 5px;
+}
+
+.ships div:hover {
+  transform: scale(1.05);
+  cursor: pointer;
+}
+
+.ships div:active {
+  transform: scale(0.95);
+}
+
+.ships span {
+  margin: 5px 10px;
+  font-family: 'US Navy';
+  font-weight:normal;
+  font-size: 30px;
+  height: 60px;
+  color: black;
+}
 
 .panel {
   background-color: black;
   text-align: center;
   min-height: 60px;
+}
+
+.arrow-up {
+  border-left: none;
+  border-right: none;
+  border-bottom: 10px solid rgba(255, 251, 0, 0.5);
+  /* clip-path: polygon(50% 0, 0 100%, 100% 100%); */
+}
+/* div.arrow-up:hover {
+  border-bottom: 10px solid rgba(255, 251, 0, 0.5);
+}
+div.arrow-up:active {
+  border-bottom: 10px solid rgba(255, 251, 0, 0.8);
+} */
+
+.arrow-down {
+  width: 0; 
+  height: 0; 
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  
+  border-top: 20px solid #f00;
+}
+
+.arrow-right {
+  width: 0; 
+  height: 0; 
+  border-top: 60px solid transparent;
+  border-bottom: 60px solid transparent;
+  
+  border-left: 60px solid green;
+}
+
+.arrow-left {
+  width: 0; 
+  height: 0; 
+  border-top: 10px solid transparent;
+  border-bottom: 10px solid transparent; 
+  
+  border-right:10px solid blue; 
 }
 
