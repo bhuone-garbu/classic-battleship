@@ -22,6 +22,7 @@ body {
   background: rgba(51, 68, 115, 0.8);
   background: radial-gradient(rgba(255, 255, 255, 0.8), rgba(51, 68, 115, 0.9), rgb(0, 0, 0));
   background-attachment: fixed;
+  display:-webkit-flex;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -91,6 +92,7 @@ header {
 
 .player-grid, .bot-grid {
   margin: 0 auto;
+  display:-webkit-flex;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -156,6 +158,8 @@ div.grid-missed {
 button {
   width: 90px;
   height: 40px;
+  border: none;
+  font-family: Courier, monospace;
   background-color: rgb(119, 136, 153);
   border-radius: 5px;
   font-size: 0.8rem;
@@ -282,6 +286,11 @@ div.fleet-destroyed:after {
 .responsive-width{
   max-width: 90vw;
   width: 850px;
+}
+
+footer {
+  background-color: rgba(0, 0, 0, 0.8);
+  width: 100%;
 }
 
 footer p:first-of-type {
