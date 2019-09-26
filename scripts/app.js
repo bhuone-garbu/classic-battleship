@@ -13,6 +13,8 @@ const CSS_FLEET_DEPLOYED = 'deployed'
 let AXIS = 'H' // 'V'
 const switchAxis = () => AXIS = AXIS === 'H' ? 'V' : 'H' // this just flips the axis
 
+const DEBUG = false
+
 // initial fleet name as key and value as the size of the fleet - size as in the nuber of cells it takes on the grid
 // ths does not mean that all these fleets will be used
 const FLEET_SIZE_INFO = {
@@ -568,6 +570,11 @@ function hideOverlay() {
 // DOM Hook
 window.addEventListener('DOMContentLoaded', () => {
 
+  console.log('This is battleship developed by bhuone-garbu')
+  console.log('https://github.com/bhuone-garbu/classic-battleship')
+
+  if (!DEBUG) console.log = function() {}
+
   let lastClickedFleetDiv
 
   // this array is the source of truth for array of 'fleet' that was used in the game
@@ -644,6 +651,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   function startAttacking(){
     game.deployBotFleets(playableFleets)
+    rotateBtn.style.display = 'none'
     const botFleets = document.querySelectorAll('.bot-container .fleets div')
     botFleets.forEach( div => div.classList.add(CSS_FLEET_DEPLOYED))
     showOverlay('Bot has deployed its fleets. Start attacking now!!!')

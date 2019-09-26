@@ -49,12 +49,9 @@ header {
 
 .main-container {
   flex-grow: 1;
+  min-height: 100vh;
 }
 
-.max-width {
-  max-width: 90vw;
-  width: 650px;
-}
 
 .player-container, .bot-container {
   flex-wrap: wrap;
@@ -80,7 +77,7 @@ header {
   border-right: 40px black solid;
   border-left: 40px black solid;
   height: 25px;
-  width: 200px;
+  width: 600px;
   margin: 0 auto;
 }
 
@@ -98,7 +95,7 @@ header {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  max-width: 80%;
+  max-width: 90%;
   background-color: rgba(100, 127, 153, 0.6);
 }
 
@@ -174,20 +171,21 @@ button:active {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+  width: 100%;
 }
 
 .fleets span {
   margin: 5px 10px;
   font-family: 'US Navy';
   font-weight:normal;
-  font-size: 32px;
+  font-size: 25px;
   height: 60px;
 }
 
 .fleets div {
   font-family: Courier, 'Courier New', monospace;
   font-weight: bold;
-  width: 140px;
+  width: 15%;
   background-color: rgb(100, 127, 153);
   margin: 5px;
   border-radius: 5px;
@@ -283,6 +281,13 @@ div.fleet-destroyed:after {
 
 .responsive-width{
   max-width: 90vw;
+  width: 850px;
+}
+
+footer p:first-of-type {
+  font-weight: 900;
+  text-transform: uppercase;
+  margin-bottom: 5px;
 }
 
 @media only screen and (max-width:1050px){
@@ -294,6 +299,11 @@ div.fleet-destroyed:after {
     background-color: black;
     text-align: center;
     min-height: 60px;
+  }
+
+  .hinge {
+    width: 400px;
+    height: 20px;
   }
 
   .fleets span {
@@ -318,8 +328,18 @@ div.fleet-destroyed:after {
 }
 
 @media only screen and (max-width:650px){
+
+  footer {
+    margin-top: 20px;
+  }
+
+  .hinge {
+    width: 300px;
+    height: 15px;
+  }
+
   .responsive-width {
-    min-width: 580px;
+    width: 580px;
   }
   .player-container {
     transform: scale(1);
