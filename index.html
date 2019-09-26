@@ -15,11 +15,17 @@
 <body>
 
   <header>
-      <h1>Classic Battleship</h1>
+      <h1>Navy Battleship</h1>
   </header>
 
-  <div class="main-container">
+  <div class="overlay">
+    <div class="overlay-content">
+      <p>ihhkhkkkhjkjkjhjkhjkkhj</p>
+    </div>
+  </div>
 
+  <div class="main-container">
+    <button id="testing"Testing></button>
     <section class="bot-container">
       <div class="info">
       </div>
@@ -28,25 +34,24 @@
         <div class="bot-grid"></div>
       </div>
       <div class="panel">
-          <div class="ships">
+          <div class="fleets">
               <div id="battleship">
                 <p>Battleship<p></p>
                 <span>V</span>
-                <!-- <button value="battleship">Q</button> -->
-              </div>
-              <div id="destroyer">
-                <p>Destroyer<p></p>
-                <span>Q</span>
               </div>
               <div id="carrier">
                 <p>Carrier<p></p>
                 <span>B</span>
               </div>
-              <div id="Patrol">
+              <div id="destroyer">
+                <p>Destroyer<p></p>
+                <span>Q</span>
+              </div>
+              <div id="patrol">
                 <p>Patrol<p></p>
                 <span>C</span>
               </div>
-              <div id="Submarine">
+              <div id="submarine">
                 <p>Submarine<p></p>
                 <span>(</span>
               </div>
@@ -65,24 +70,24 @@
         <button id="rotateBtn" disabled>Rotate</button>
         <button id="startAttacking" disabled>Start</button>
 
-        <div class="ships">
-          <div id="battleship">
+        <div class="fleets">
+          <div id="battleship" class="predeploy">
             <p>Battleship<p></p>
             <span>V</span>
           </div>
-          <div id="destroyer">
-            <p>Destroyer<p></p>
-            <span>Q</span>
-          </div>
-          <div id="carrier">
+          <div id="carrier" class="predeploy">
             <p>Carrier<p></p>
             <span>B</span>
           </div>
-          <div id="patrol">
+          <div id="destroyer" class="predeploy">
+            <p>Destroyer<p></p>
+            <span>Q</span>
+          </div>
+          <div id="patrol" class="predeploy">
             <p>Patrol<p></p>
             <span>C</span>
           </div>
-          <div id="submarine">
+          <div id="submarine" class="predeploy">
             <p>Submarine<p></p>
             <span>(</span>
           </div>

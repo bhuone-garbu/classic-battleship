@@ -36,8 +36,7 @@ h1 {
 }
 
 header {
-  background-color: black;
-  height: 10vh;
+  background-color: rgba(0, 0, 0, 0.8);
   width: 100%;
   margin-bottom: 20px;
 }
@@ -70,13 +69,15 @@ header {
   height: 25px;
   width: 200px;
   margin: 0 auto;
-
 }
+
 .screen {
   background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
 }
-
+.screen p {
+  font-size: 1.2rem;
+}
 
 .player-grid, .bot-grid {
   margin: 0 auto;
@@ -85,20 +86,8 @@ header {
   justify-content: center;
   align-items: center;
   max-width: 70%;
-  /* background-color: rgba(68, 125, 143, 0.2); */
   background-color: rgba(100, 127, 153, 0.6);
-  /* mix-blend-mode: difference; */
-  /* border: 2px black solid; */
 }
-/* .player-grid {
-  background-color: rgba(68, 125, 143, 0.2);
-  mix-blend-mode: difference;
-}
-.bot-grid {
-  background-color: rgba(68, 125, 143, 0.2);
-  mix-blend-mode: difference;
-} */
-
 
 
 .player-grid div, .bot-grid div {
@@ -111,18 +100,22 @@ header {
 }
 
 
-.bot-grid div:hover {
-  background-color: rgba(134, 14, 14, 0.5);
-}
+
 
 div.fleet-attacked {
+  background-color: rgba(134, 14, 14, 0.5);
   background-image: url('../res/images/explosion.svg');
   background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 div.fleet-missed {
+  background-color: rgba(134, 14, 14, 0.5);
   background-image: url('../res/images/missed.svg');
   background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 div.fleet-destroyed {
@@ -140,17 +133,18 @@ div.fleet-destroyed {
 
 .bot-grid div:hover {
   cursor: crosshair;
+  background-color: rgba(134, 14, 14, 0.5);
 }
 
 
 /* this is the highlight for the making the hover effect */
 .grid-hightlight {
-  background-color: rgba(255, 251, 0, 0.5);
+  background-color: rgba(248, 188, 39, 0.5);
 }
 
 /* this is the color to confirm the placement of the ship */
 .grid-select {
-  background-color: rgba(255, 251, 0, 0.8);
+  background-color: rgba(248, 188, 39, 0.8);
 }
 
 
@@ -168,38 +162,51 @@ button:active {
   transform: scale(0.95)
 }
 
-.ships {
+.fleets {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
 }
 
-.ships div {
+.fleets span {
+  margin: 5px 10px;
+  font-family: 'US Navy';
+  font-weight:normal;
+  font-size: 32px;
+  height: 60px;
+}
+
+.fleets div {
   font-family: Courier, 'Courier New', monospace;
   font-weight: bold;
   width: 140px;
   background-color: rgb(100, 127, 153);
   margin: 5px;
   border-radius: 5px;
-}
-
-.ships div:hover {
-  transform: scale(1.05);
   cursor: pointer;
 }
 
-.ships div:active {
+
+/* fleet pre-deployed when fleet is clicked */
+div.predeploy:hover {
+  transform: scale(1.05);
+}
+
+div.predeploy:active {
   transform: scale(0.95);
 }
 
-.ships span {
-  margin: 5px 10px;
-  font-family: 'US Navy';
-  font-weight:normal;
-  font-size: 30px;
-  height: 60px;
-  color: black;
+div.fleet-select {
+  background-color: black;
+  color: rgba(248, 188, 39, 0.7);
 }
+
+div.deployed {
+  color: black;
+  background-color: rgba(248, 188, 39, 0.8);
+}
+
+
 
 .panel {
   background-color: black;
@@ -247,3 +254,32 @@ div.arrow-up:active {
   border-right:10px solid blue; 
 }
 
+.overlay {
+  /* Height & width depends on how you want to reveal the overlay (see JS below) */   
+  height: 0;
+  width: 100%;
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  overflow-x: hidden; /* Disable horizontal scroll */
+  transition: 0.5s; /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
+  display: flex;
+  justify-content: center;
+}
+
+/* Position the content inside the overlay */
+.overlay-content {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  top: 25%; /* 25% from the top */
+  /* max-width: 90vw; */
+  width: 100%;
+  /* width: 100%; */
+  max-height: 15vh;
+  background-color: rgb(0,0,0); /* Black fallback color */
+  background-color: rgba(0,0,0, 0.8); /* Black w/opacity */
+  text-align: center; /* Centered text/links */
+}
