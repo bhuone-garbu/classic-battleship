@@ -5,6 +5,7 @@
   transition: all 0.1s ease-in;
   margin: 0;
   padding: 0;
+  text-align: center;
 }
 
 @font-face {
@@ -12,12 +13,20 @@
   src: url('../fonts/usnavy/usnavy.ttf');
 }
 
+a {
+  text-decoration: none;
+  color: rgb(248, 188, 39);
+}
+
 body {
-  /* position: relative; */
-  background-image: url(../res/images/battleship-bg.jpg);
+  /* background-image: url(../res/images/battleship-bg.jpg);
   background-repeat: repeat;
   background-attachment: fixed;
-  background-size: 100%;
+  background-size: 100%; */
+  background: rgb(51, 68, 115); /*backward compatibility*/
+  background: rgba(51, 68, 115, 0.8);
+  background: radial-gradient(rgba(255, 255, 255, 0.8), rgba(51, 68, 115, 0.9), rgb(0, 0, 0));
+  background-attachment: fixed;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -32,11 +41,11 @@ h1 {
   text-align: center;
   font-weight: 900;
   font-size: 2.95rem;
-  color: aliceblue;
+  color: rgb(240, 248, 255);
 }
 
 header {
-  background-color: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   width: 100%;
   margin-bottom: 20px;
 }
@@ -64,6 +73,10 @@ header {
 
 .player-container {
   transform: perspective(1400px) rotateX(40deg) scale(1.2) translateY(-85px);
+}
+
+.bot-container {
+  transform: perspective(3400px);
 }
 
 .hinge {
@@ -204,7 +217,8 @@ div.fleet-select {
 
 div.deployed {
   color: black;
-  background-color: rgba(248, 188, 39, 0.8);
+  background: rgba(248, 188, 39, 0.8);
+  background: linear-gradient(rgba(255, 255, 255, 0.9), rgb(248, 188, 39));
 }
 
 
@@ -303,7 +317,7 @@ div.arrow-up:active {
   .fleets span {
     margin: 2px 5px;
     font-weight:normal;
-    font-size: 25px;
+    font-size: 20px;
     height: 20px;
   }
   
@@ -324,7 +338,6 @@ div.arrow-up:active {
 @media only screen and (max-width:650px){
   .responsive-width {
     min-width: 580px;
-    width: 100%;
   }
   .player-container {
     transform: scale(1);
