@@ -43,6 +43,9 @@ header {
 
 .main-container {
   flex-grow: 1;
+}
+
+.max-width {
   max-width: 90vw;
   width: 650px;
 }
@@ -60,7 +63,7 @@ header {
 }
 
 .player-container {
-  transform: perspective(1400px) rotateX(40deg) scale(1.2) translateY(-100px);
+  transform: perspective(1400px) rotateX(40deg) scale(1.2) translateY(-85px);
 }
 
 .hinge {
@@ -85,7 +88,7 @@ header {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  max-width: 70%;
+  max-width: 80%;
   background-color: rgba(100, 127, 153, 0.6);
 }
 
@@ -94,12 +97,10 @@ header {
   border: 2px rgba(0, 0, 0, 0.5) solid;
   padding: 0;
   flex-basis: 10%;
-  height: 30px;
+  height: 35px;
   width: 10%;
   text-align: justify;
 }
-
-
 
 
 div.fleet-attacked {
@@ -207,19 +208,18 @@ div.deployed {
 }
 
 
-
 .panel {
   background-color: black;
   text-align: center;
   min-height: 60px;
 }
 
-.arrow-up {
+/* .arrow-up {
   border-left: none;
   border-right: none;
   border-bottom: 10px solid rgba(255, 251, 0, 0.5);
-  /* clip-path: polygon(50% 0, 0 100%, 100% 100%); */
-}
+  clip-path: polygon(50% 0, 0 100%, 100% 100%);
+} */
 /* div.arrow-up:hover {
   border-bottom: 10px solid rgba(255, 251, 0, 0.5);
 }
@@ -227,7 +227,7 @@ div.arrow-up:active {
   border-bottom: 10px solid rgba(255, 251, 0, 0.8);
 } */
 
-.arrow-down {
+/* .arrow-down {
   width: 0; 
   height: 0; 
   border-left: 20px solid transparent;
@@ -252,7 +252,7 @@ div.arrow-up:active {
   border-bottom: 10px solid transparent; 
   
   border-right:10px solid blue; 
-}
+} */
 
 .overlay {
   /* Height & width depends on how you want to reveal the overlay (see JS below) */   
@@ -274,12 +274,59 @@ div.arrow-up:active {
   display: flex;
   justify-content: center;
   align-items: center;
-  top: 25%; /* 25% from the top */
+  top: 30%; /* 25% from the top */
   /* max-width: 90vw; */
-  width: 100%;
   /* width: 100%; */
+  overflow-y: scroll;
+  width: 100%;
   max-height: 15vh;
   background-color: rgb(0,0,0); /* Black fallback color */
   background-color: rgba(0,0,0, 0.8); /* Black w/opacity */
   text-align: center; /* Centered text/links */
+}
+
+.responsive-width{
+  max-width: 90vw;
+}
+
+@media only screen and (max-width:1050px){
+  .responsive-width {
+    width: 650px;
+  }
+
+  .panel {
+    background-color: black;
+    text-align: center;
+    min-height: 60px;
+  }
+
+  .fleets span {
+    margin: 2px 5px;
+    font-weight:normal;
+    font-size: 25px;
+    height: 20px;
+  }
+  
+  .fleets div {
+    width: 100px;
+    margin: 2px;
+  }
+
+  .player-grid div, .bot-grid div {
+    height: 25px;
+  }
+
+  .player-container {
+    transform: perspective(1400px) rotateX(40deg) scale(1.15) translateY(-80px);
+  }
+}
+
+@media only screen and (max-width:650px){
+  .responsive-width {
+    min-width: 580px;
+    width: 100%;
+  }
+  .player-container {
+    transform: scale(1);
+  }
 }
