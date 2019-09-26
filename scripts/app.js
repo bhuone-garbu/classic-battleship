@@ -3,8 +3,8 @@
 // const CSS_DEFAULT_GRID_COLOR = 'default-grid-color'
 const CSS_GRID_HOVER = 'grid-hightlight'
 const CSS_GRID_SELECT = 'grid-select'
-const CSS_GRID_ATTACKED = 'fleet-attacked'
-const CSS_GRID_MISSED = 'fleet-missed'
+const CSS_GRID_ATTACKED = 'grid-attacked'
+const CSS_GRID_MISSED = 'grid-missed'
 
 const CSS_FLEET_PREDEPLOY = 'predeploy'
 const CSS_FLEET_SELECT = 'fleet-select'
@@ -22,7 +22,6 @@ const FLEET_SIZE_INFO = {
   patrol: 3,
   submarine: 2
 }
-
 
 
 // utility functions for returning x and y coordinate from index and vice versa
@@ -364,29 +363,26 @@ class Bot extends Player {
   // randomly places fleets and return all the coordinates that was used
   deployFleetsRandomly(gameWidth, playableFleets){
 
-    // this is the list of the coordinates of the fleet that the bot deployed
-    let deployCoordinates = []
-
     // using arrow syntax to access 'this.allFleetsCoordinates' variable
     playableFleets.forEach( fleetName => {
 
-      AXIS = ['H', 'V'][Math.floor(Math.random() * gameWidth ** 1 )] // randomly pick a axis
+      //let deployCoordinates = []
+      AXIS = ['H', 'V'][Math.floor(Math.random() * 2 )] // randomly pick a axis
       let randomIndex = Math.floor(Math.random() * gameWidth ** 2 )
 
       // keep calculating until we get a spot that was not previously used
       let randomIndexCoordinates = calcRelativeCoordinates(randomIndex, gameWidth, FLEET_SIZE_INFO[fleetName])
       while (randomIndexCoordinates.some(index => this.allFleetsCoordinates.includes(index))){
+        AXIS = ['H', 'V'][Math.floor(Math.random() * 2 )] // randomly pick a axis
         randomIndex = Math.floor(Math.random() * gameWidth ** 2 )
         randomIndexCoordinates = calcRelativeCoordinates(randomIndex, gameWidth, FLEET_SIZE_INFO[fleetName])
       }
 
       // save the coordinates
       this.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], randomIndexCoordinates)
-      deployCoordinates = deployCoordinates.concat(randomIndexCoordinates)
+      this.allFleetsCoordinates = this.allFleetsCoordinates.concat(randomIndexCoordinates)
     })
     
-    this.allFleetsCoordinates = this.allFleetsCoordinates.concat(deployCoordinates)
-    return deployCoordinates
   }
 }
 
@@ -451,9 +447,7 @@ class Game {
       if (!this.gameEnded) {
         this.letBotAttackHuman()
       }
-
     }
-    
   }
 
   letBotAttackHuman(){
@@ -479,7 +473,6 @@ class Game {
       this.checkGameEnded()
       this.addAttackableClickEventsForPlayerGrids()
     }, 600)
-    
   }
 
   
@@ -491,6 +484,12 @@ class Game {
     }
   }
 
+  markFleetAsDestroyed(fleetName, isBot){
+    const containerName = isBot ? '.bot-container' : '.player-container'
+    const fleetDiv = document.querySelector(`${containerName} div #${fleetName}`)
+    console.log('query selector::: ', `${containerName} div #${fleetName}`)
+    fleetDiv.classList.add('fleet-destroyed')
+  }
 
   // check and update the CSS accordingly - if hit return true, if not return false
   checkAndMarkFleetHit(indexCoordinate, isBot = true) {
@@ -508,16 +507,18 @@ class Game {
     for (const fleetName in player.deployedFleets) {
       if (player.deployedFleets[fleetName].isIndexCoordinateMatched(indexCoordinate)) {
 
-        const stateBeforeHit = player.deployedFleets[fleetName].isDestroyed()
+        const stateBeforeHit = player.deployedFleets[fleetName].isDestroyed() // before marking as hit on the fleet
+
         player.deployedFleets[fleetName].markHit(indexCoordinate)
         grids[indexCoordinate].classList.remove(CSS_GRID_MISSED)
         grids[indexCoordinate].classList.add(CSS_GRID_ATTACKED)
         hitSuccessful = true
 
         // increment the destroyed ship count if it was not destroyed but after hiting it, the fleet was destroyed
-        if (!stateBeforeHit && player.deployedFleets[fleetName].isDestroyed()){
-          console.log( fleetName, ' destroyed')
-          player.destroyedFleets++
+        if (player.deployedFleets[fleetName].isDestroyed()){
+          this.markFleetAsDestroyed(fleetName, isBot)
+
+          if (!stateBeforeHit) player.destroyedFleets++
         }
       }
     }
@@ -526,25 +527,43 @@ class Game {
   }
 
   deployBotFleets(playableFleets){
-    const deployedCoordinates = this.bot.deployFleetsRandomly(this.width, playableFleets)
-    deployedCoordinates.forEach( index => this.botDivs[index].classList.add(CSS_GRID_SELECT))
+    this.bot.deployFleetsRandomly(this.width, playableFleets)
+    // deployedCoordinates.forEach( index => this.botDivs[index].classList.add(CSS_GRID_SELECT))
     this.addAttackableClickEventsForPlayerGrids(true)
   }
 
   checkGameEnded(){
-    this.gameEnded = this.humanPlayer.hasNoMoreFleetRemaining() || this.bot.hasNoMoreFleetRemaining()
-    if (this.gameEnded) console.log('game ended')
+    const botWon = this.humanPlayer.hasNoMoreFleetRemaining()
+    this.gameEnded = botWon || this.bot.hasNoMoreFleetRemaining()
+    if (this.gameEnded) {
+      console.log('game ended')
+      const who = botWon ? 'Bot' : 'You'
+      showOverlay(`${who} won!!!`, true)
+    }
+  }
+}
+
+function showOverlay(msg, showReloadOption = false) {
+  const selector = 'div.overlay'
+
+  if (msg && msg.length > 0) {
+    document.querySelector(`${selector} p`).innerHTML = msg
+  }
+  
+  if (showReloadOption){
+    document.querySelector(`${selector} a`).style.display = 'inline'
+    document.querySelector('div.overlay').removeEventListener('click', hideOverlay)
   }
 
+  document.querySelector(selector).style.height = '100%'
+
 }
 
-function showOverlay() {
-  document.querySelector('div.overlay').style.height = '100%'
-}
 
 function hideOverlay() {
   document.querySelector('div.overlay').style.height = '0%'
 }
+
 
 // DOM Hook
 window.addEventListener('DOMContentLoaded', () => {
@@ -558,17 +577,21 @@ window.addEventListener('DOMContentLoaded', () => {
   game.createGrid()
 
   document.querySelector('div.overlay').addEventListener('click', hideOverlay)
-  
-  document.getElementById('testing').addEventListener('click', showOverlay)
-  
 
+  // this won't be visible until game over
+  document.querySelector('.overlay-content a').addEventListener('click', () => {
+    hideOverlay()
+    location.reload()
+  })
+
+  setTimeout(() => showOverlay('Start deploying your fleets by clicking on them. Goodluck!'), 300 )
+  
   const rotateBtn = document.getElementById('rotateBtn')
   //const shipButtons = document.querySelectorAll('.ships button')
 
   const humanShipDivs = document.querySelectorAll('.player-container .fleets div')
   let totalShipsToDeploy = humanShipDivs.length
-  // game
-  const startButton = document.getElementById('startAttacking')
+
 
   // remove event listener
   function clearPlayer1EventListeners(){
@@ -610,11 +633,20 @@ window.addEventListener('DOMContentLoaded', () => {
       game.humanPlayer.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], indexCoordinates)
       game.humanPlayer.allFleetsCoordinates = game.humanPlayer.allFleetsCoordinates.concat(indexCoordinates)
       
-      if ( --totalShipsToDeploy === 0) startButton.disabled = false
       rotateBtn.disabled = true
       lastClickedFleetDiv.removeEventListener('click', addMouseOverOutClickEventInGrid)
-    }
-    
+
+      if ( --totalShipsToDeploy === 0) {
+        startAttacking()
+      }
+    } 
+  }
+
+  function startAttacking(){
+    game.deployBotFleets(playableFleets)
+    const botFleets = document.querySelectorAll('.bot-container .fleets div')
+    botFleets.forEach( div => div.classList.add(CSS_FLEET_DEPLOYED))
+    showOverlay('Bot has deployed its fleets. Start attacking now!!!')
   }
 
   function predeployMouseover(e){
@@ -656,14 +688,5 @@ window.addEventListener('DOMContentLoaded', () => {
   
   // rotate means we just need to switch the axis so mouseover, mouseout and click event listener will be reflected based on that
   rotateBtn.addEventListener('click', switchAxis) 
-
-  startButton.addEventListener('click', () => {
-    game.deployBotFleets(playableFleets)
-    const botFleets = document.querySelectorAll('.bot-container .fleets div')
-    botFleets.forEach( div => {
-      div.classList.add(CSS_FLEET_DEPLOYED)
-    })
-    startButton.disabled = true
-  })
 
 })
