@@ -558,7 +558,6 @@ function showOverlay(msg, showReloadOption = false) {
   }
 
   document.querySelector(selector).style.height = '100%'
-
 }
 
 
@@ -566,6 +565,14 @@ function hideOverlay() {
   document.querySelector('div.overlay').style.height = '0%'
 }
 
+function toggleGameRulesDisplay() {
+  const rulesDiv = document.querySelector('.game-rules div')
+  if (rulesDiv.style.display === 'none'){
+    rulesDiv.style.display = 'block'
+  } else {
+    rulesDiv.style.display = 'none'
+  }
+}
 
 // DOM Hook
 window.addEventListener('DOMContentLoaded', () => {
@@ -590,6 +597,8 @@ window.addEventListener('DOMContentLoaded', () => {
     hideOverlay()
     location.reload()
   })
+
+  document.querySelector('.game-rules a').addEventListener('click', toggleGameRulesDisplay)
 
   setTimeout(() => showOverlay('Start deploying by clicking on your fleets!'), 300 )
   

@@ -17,6 +17,23 @@ a {
   color: rgb(248, 188, 39);
 }
 
+
+.game-rules a{
+  border-top: 2px white solid;
+  border-bottom: 2px white solid;
+}
+
+.rules-heading span {
+  border-bottom: 2px black solid;
+}
+
+.game-rules {
+  margin: 10px 0;
+  cursor: pointer;
+  max-width: 75%;
+}
+
+
 body {
   background: rgb(51, 68, 115); /*backward compatibility*/
   background: rgba(51, 68, 115, 0.8);
@@ -26,6 +43,7 @@ body {
   color: white;
   display: flex;
   flex-direction: column;
+  height: 100vh;
 }
 
 h1 {
@@ -40,15 +58,35 @@ h1 {
 header {
   background: rgba(0, 0, 0, 0.4);
   width: 100%;
-  margin-bottom: 3rem;
   display: flex;
   align-items: center;
+}
+
+.game-rules {
+  width: 80%;
+  margin: 10px auto;
+  max-width: 800px;
+}
+
+.game-rules div {
+  display: none;
+  margin: 1rem;
+  text-align: left;
+  background: rgba(255, 255, 255);
+  background: rgba(255, 255, 255, 0.5);
+  color: black;
+  border-radius: 5px;
+}
+
+.rules-heading {
+  font-weight: bold;
+  margin-top: 1.2rem;
 }
 
 .main-container {
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
   max-height: 1050px;
   max-width: 850px;
 }
@@ -198,7 +236,6 @@ button:active {
   cursor: pointer;
 }
 
-
 /* fleet pre-deployed when fleet is clicked */
 div.predeploy:hover {
   transform: scale(1.05);
@@ -240,7 +277,6 @@ div.fleet-destroyed:after {
   bottom: 0;
 }
 
-
 .panel {
   background-color: black;
   text-align: center;
@@ -261,6 +297,7 @@ div.fleet-destroyed:after {
   justify-content: center;
 }
 
+
 /* Position the content inside the overlay */
 .overlay-content {
   position: relative;
@@ -277,7 +314,6 @@ div.fleet-destroyed:after {
   text-align: center; /* Centered text/links */
 }
 
-
 .overlay-content a {
   display: none;
 }
@@ -292,12 +328,12 @@ footer {
   background-color: rgba(0, 0, 0, 0.8);
   width: 100%;
   flex-grow: 1;
+  padding: 30px 10px;
 }
 
 footer p:first-of-type {
   font-weight: 900;
   text-transform: uppercase;
-  margin-bottom: 5px;
 }
 
 @media only screen and (max-width:1000px){
@@ -307,7 +343,7 @@ footer p:first-of-type {
   }
 
   .responsive-width {
-    width: 65vw;
+    width: 80vw;
     height: 850px;
   }
 
@@ -344,6 +380,7 @@ footer p:first-of-type {
 }
 
 @media only screen and (max-width:850px){
+
   .fleets span {
     font-size: 15px;
   }
@@ -354,7 +391,7 @@ footer p:first-of-type {
 
 @media only screen and (max-width:650px){
 
-  .screen p, button {
+  .screen p, .screen button {
     font-size: 1rem;
   }
 
@@ -412,9 +449,17 @@ footer p:first-of-type {
     min-height: 100vh;
   }
 
-  .screen p, button {
+  .panel {
+    padding: 0 0.5rem;
+  }
+
+  .screen p, .screen button {
     font-size: 0.8rem;
   }
+
+  /* button {
+    font-size: 0.rem;
+  } */
 
   .bot-container .panel {
     flex: 1;
