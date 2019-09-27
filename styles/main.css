@@ -87,7 +87,7 @@ header {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-height: 1050px;
+  height: 1050px;
   max-width: 850px;
 }
 
@@ -134,6 +134,8 @@ header {
   align-items: center;
   max-width: 70%;
   height: 90%;
+  min-height: 180px;
+  min-width: 180px;
   background-color: rgba(100, 127, 153, 0.6);
 }
 
@@ -192,7 +194,7 @@ div.grid-missed {
 
 
 .screen p, .screen button {
-  font-size: 1.2rem;
+  font-size: 1.4rem;
 }
 
 button {
@@ -375,7 +377,7 @@ footer p:first-of-type {
   }
 
   .player-container {
-    transform: perspective(1400px) rotateX(40deg) scale(1.15) translateY(-65px);
+    transform: perspective(1400px) rotateX(40deg) scale(1.15) translateY(-75px);
   }
 }
 
