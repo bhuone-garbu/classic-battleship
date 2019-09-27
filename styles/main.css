@@ -24,6 +24,8 @@ body {
   background-attachment: fixed;
   font-family: 'Bree Serif', serif;
   color: white;
+  display: flex;
+  flex-direction: column;
 }
 
 h1 {
@@ -82,9 +84,8 @@ header {
   flex-grow: 1;
   flex: 5;
 }
-.screen p {
-  font-size: 1.2rem;
-}
+
+
 
 .player-grid, .bot-grid {
   margin: 0 auto;
@@ -152,17 +153,20 @@ div.grid-missed {
 }
 
 
+.screen p, .screen button {
+  font-size: 1.2rem;
+}
+
 button {
   width: 80px;
-  height: 25px;
+  height: 100%;
   border: none;
   font-family: Courier, monospace;
   background-color: rgb(119, 136, 153);
   border-radius: 5px;
-  font-size: 0.8rem;
   font-weight: bold;
   box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.2);
-  margin: 2px 0;
+  margin: 0 5px;
 }
 
 button:active {
@@ -241,12 +245,7 @@ div.fleet-destroyed:after {
   background-color: black;
   text-align: center;
   width: 100%;
-}
-.bot-container .panel {
-  flex: 1;
-}
-.player-container .panel {
-  flex: 2.2;
+  flex: 1
 }
 
 .overlay { 
@@ -292,6 +291,7 @@ footer {
   margin-top: 20px;
   background-color: rgba(0, 0, 0, 0.8);
   width: 100%;
+  flex-grow: 1;
 }
 
 footer p:first-of-type {
@@ -311,24 +311,27 @@ footer p:first-of-type {
     height: 850px;
   }
 
-  .player-container, .bot-container {
-    border: 18px solid black;
+  .message {
+    height: auto;
+    width: 65vw;
+    font-size: 1.1rem;
   }
 
-  div.message {
-    height: auto;
-    max-height: auto;
-    font-size: 1.1rem;
+  .player-container, .bot-container {
+    border: 18px solid black;
+    height: 55%;
   }
 
   .hinge {
     width: 400px;
+    max-width: 60%;
   }
 
   .fleets span {
     margin: 1px 2px;
     font-size: 20px;
     height: 10px;
+    max-width: 90%;
   }
 
   .fleets p {
@@ -340,10 +343,27 @@ footer p:first-of-type {
   }
 }
 
+@media only screen and (max-width:850px){
+  .fleets span {
+    font-size: 15px;
+  }
+  .screen p, button {
+    font-size: 1.1rem;
+  }
+}
+
 @media only screen and (max-width:650px){
+
+  .screen p, button {
+    font-size: 1rem;
+  }
 
   header {
     margin-bottom: 1rem;
+  }
+
+  .fleets span {
+    font-size: 25px;
   }
 
   h1 {
@@ -352,7 +372,11 @@ footer p:first-of-type {
 
   .responsive-width {
     width: 95vw;
-    min-height: auto;
+    min-height: 850px;
+  }
+
+  .message {
+    width: 95vw;
   }
 
   div.message {
@@ -369,11 +393,46 @@ footer p:first-of-type {
     justify-content: space-evenly;
   }
 
+  .panel {
+    padding: 0 1.5rem;
+  }
+
   footer {
     margin-top: 20px;
   }
 
   .player-container {
     transform: scale(1);
+  }
+}
+
+@media only screen and (max-width:375px){
+
+  .main-container{
+    min-height: 100vh;
+  }
+
+  .screen p, button {
+    font-size: 0.8rem;
+  }
+
+  .bot-container .panel {
+    flex: 1;
+  }
+  .player-container .panel {
+    flex: 1;
+  }
+
+  .screen {
+    flex: 3;
+    flex-grow: 1;
+  }
+
+  .player-grid div, .bot-grid div{
+    flex-grow: 1;
+  }
+
+  .fleets div {
+    width: 40%;
   }
 }
