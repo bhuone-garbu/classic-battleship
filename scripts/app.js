@@ -15,6 +15,9 @@ const switchAxis = () => AXIS = AXIS === 'H' ? 'V' : 'H' // this just flips the 
 
 const DEBUG = false
 
+let currentPlayingAudio
+let muteSound = false
+
 // initial fleet name as key and value as the size of the fleet - size as in the nuber of cells it takes on the grid
 // ths does not mean that all these fleets will be used
 const FLEET_SIZE_INFO = {
@@ -541,6 +544,16 @@ class Game {
       console.log('game ended')
       const who = botWon ? 'Bot' : 'You'
       showOverlay(`${who} won!!!`, true)
+
+      if (!muteSound){
+        if (currentPlayingAudio) {
+          currentPlayingAudio.currentTime = 0
+          currentPlayingAudio.pause()
+        }
+        currentPlayingAudio = botWon ? document.getElementById('loseSound') : document.getElementById('winSound')
+        currentPlayingAudio.currentTime = 0
+        currentPlayingAudio.play()
+      }
     }
   }
 }
@@ -590,7 +603,18 @@ window.addEventListener('DOMContentLoaded', () => {
   const game = new Game(10)
   game.createGrid()
 
-  document.querySelector('div.overlay').addEventListener('click', hideOverlay)
+  document.querySelector('div.overlay').addEventListener('click', () => {
+    hideOverlay()
+    if (!muteSound){
+      if (currentPlayingAudio) {
+        currentPlayingAudio.currentTime = 0
+        currentPlayingAudio.pause()
+      }
+      currentPlayingAudio = document.getElementById('themeSound')
+      currentPlayingAudio.currentTime = 0
+      currentPlayingAudio.play()
+    }
+  })
 
   // this won't be visible until game over
   document.querySelector('.overlay-content a').addEventListener('click', () => {
