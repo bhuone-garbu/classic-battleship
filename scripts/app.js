@@ -546,10 +546,10 @@ class Game {
       showOverlay(`${who} won!!!`, true)
 
       if (!muteSound){
-        if (currentPlayingAudio) {
-          currentPlayingAudio.currentTime = 0
-          currentPlayingAudio.pause()
-        }
+        // if (currentPlayingAudio) {
+        //   currentPlayingAudio.currentTime = 0
+        //   currentPlayingAudio.pause()
+        // }
         currentPlayingAudio = botWon ? document.getElementById('loseSound') : document.getElementById('winSound')
         currentPlayingAudio.currentTime = 0
         currentPlayingAudio.play()
@@ -606,10 +606,10 @@ window.addEventListener('DOMContentLoaded', () => {
   document.querySelector('div.overlay').addEventListener('click', () => {
     hideOverlay()
     if (!muteSound){
-      if (currentPlayingAudio) {
-        currentPlayingAudio.currentTime = 0
-        currentPlayingAudio.pause()
-      }
+      // if (currentPlayingAudio) {
+      //   currentPlayingAudio.currentTime = 0
+      //   currentPlayingAudio.pause()
+      // }
       currentPlayingAudio = document.getElementById('themeSound')
       currentPlayingAudio.currentTime = 0
       currentPlayingAudio.play()
