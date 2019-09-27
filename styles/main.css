@@ -43,7 +43,7 @@ body {
   color: white;
   display: flex;
   flex-direction: column;
-  height: 100vh;
+  min-height: 100vh;
 }
 
 h1 {
@@ -95,20 +95,21 @@ header {
 .player-container, .bot-container {
   display: flex;
   flex-direction: column;
-  height: 50%;
+  height: 60%;
   border: 25px solid black;
   border-radius: 20px;
   /* width: 700px; */
   width: 100%;
   box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.8);
+  flex-grow: 1;
 }
 
 .player-container {
-  transform: perspective(1400px) rotateX(35deg) scale(1.12) translateY(-55px);
+  transform: perspective(1400px) rotateX(35deg) scale(1.12) translateY(-70px);
 }
 
 .hinge {
-  flex-basis: 1%;
+  flex-basis: 2%;
   border-right: 40px black solid;
   border-left: 40px black solid;
   width: 600px;
@@ -134,7 +135,7 @@ header {
   align-items: center;
   max-width: 70%;
   height: 90%;
-  min-height: 180px;
+  /* min-height: 180px; */
   min-width: 180px;
   background-color: rgba(100, 127, 153, 0.6);
 }
@@ -198,7 +199,7 @@ div.grid-missed {
 }
 
 button {
-  width: 80px;
+  width: 90px;
   height: 100%;
   border: none;
   font-family: Courier, monospace;
@@ -346,7 +347,6 @@ footer p:first-of-type {
 
   .responsive-width {
     width: 80vw;
-    height: 850px;
   }
 
   .message {
@@ -357,12 +357,13 @@ footer p:first-of-type {
 
   .player-container, .bot-container {
     border: 18px solid black;
-    height: 55%;
+    min-height: 50%;
   }
 
   .hinge {
     width: 400px;
     max-width: 60%;
+    flex-basis: 2%;
   }
 
   .fleets span {
@@ -374,6 +375,9 @@ footer p:first-of-type {
 
   .fleets p {
     font-size: 10px;
+  }
+  .panel {
+    flex-grow: 1;
   }
 
   .player-container {
@@ -434,6 +438,7 @@ footer p:first-of-type {
 
   .panel {
     padding: 0 1.5rem;
+    min-height: 150px;
   }
 
   footer {
@@ -445,11 +450,7 @@ footer p:first-of-type {
   }
 }
 
-@media only screen and (max-width:375px){
-
-  .main-container{
-    min-height: 100vh;
-  }
+@media only screen and (max-width:430px){
 
   .panel {
     padding: 0 0.5rem;
