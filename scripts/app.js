@@ -591,7 +591,7 @@ window.addEventListener('DOMContentLoaded', () => {
     location.reload()
   })
 
-  setTimeout(() => showOverlay('Start deploying your fleets by clicking on them. Goodluck!'), 300 )
+  setTimeout(() => showOverlay('Start deploying by clicking on your fleets!'), 300 )
   
   const rotateBtn = document.getElementById('rotateBtn')
   //const shipButtons = document.querySelectorAll('.ships button')
@@ -654,7 +654,7 @@ window.addEventListener('DOMContentLoaded', () => {
     rotateBtn.style.display = 'none'
     const botFleets = document.querySelectorAll('.bot-container .fleets div')
     botFleets.forEach( div => div.classList.add(CSS_FLEET_DEPLOYED))
-    showOverlay('Bot has deployed its fleets. Start attacking now!!!')
+    showOverlay('Bot has deployed its fleets. Start attacking now! Goodluck!')
   }
 
   function predeployMouseover(e){

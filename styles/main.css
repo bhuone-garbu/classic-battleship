@@ -2,7 +2,7 @@
   -webkit-box-sizing: border-box;
   -moz-box-sizing: border-box;
   box-sizing: border-box;
-  margin: 0;
+  margin: 0 auto;
   padding: 0;
   text-align: center;
 }
@@ -20,14 +20,8 @@ a {
 body {
   background: rgb(51, 68, 115); /*backward compatibility*/
   background: rgba(51, 68, 115, 0.8);
-  background: radial-gradient(rgba(255, 255, 255, 0.8), rgba(51, 68, 115, 0.9), rgb(0, 0, 0));
+  background: radial-gradient(rgba(255, 255, 255, 0.8), rgba(67, 97, 128, 0.9), rgb(0, 0, 0));
   background-attachment: fixed;
-  display:-webkit-flex;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  min-height: 100vh;
   font-family: 'Bree Serif', serif;
   color: white;
 }
@@ -36,55 +30,57 @@ h1 {
   text-transform: uppercase;
   text-align: center;
   font-weight: 900;
-  font-size: 2.95rem;
+  font-size: 5rem;
   color: rgb(240, 248, 255);
-   /* 16 * 0.0625 = 1px */
-   letter-spacing: 0.0625em;
+  letter-spacing: 0.0625em;
 }
 
 header {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0, 0, 0, 0.4);
   width: 100%;
-  margin-bottom: 20px;
+  margin-bottom: 3rem;
+  display: flex;
+  align-items: center;
 }
 
 .main-container {
-  flex-grow: 1;
-  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-height: 1050px;
+  max-width: 850px;
 }
 
 
 .player-container, .bot-container {
-  flex-wrap: wrap;
-  align-items: center;
-  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  height: 50%;
   border: 25px solid black;
   border-radius: 20px;
-  height: auto;
   /* width: 700px; */
   width: 100%;
   box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.8);
 }
 
 .player-container {
-  transform: perspective(1400px) rotateX(40deg) scale(1.2) translateY(-85px);
-}
-
-.bot-container {
-  transform: perspective(3400px);
+  transform: perspective(1400px) rotateX(35deg) scale(1.12) translateY(-55px);
 }
 
 .hinge {
+  flex-basis: 1%;
   border-right: 40px black solid;
   border-left: 40px black solid;
-  height: 25px;
   width: 600px;
   margin: 0 auto;
 }
 
 .screen {
+  width: 100%;
   background-color: rgba(0, 0, 0, 0.8);
   text-align: center;
+  flex-grow: 1;
+  flex: 5;
 }
 .screen p {
   font-size: 1.2rem;
@@ -97,7 +93,8 @@ header {
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  max-width: 90%;
+  max-width: 70%;
+  height: 90%;
   background-color: rgba(100, 127, 153, 0.6);
 }
 
@@ -106,7 +103,7 @@ header {
   border: 2px rgba(0, 0, 0, 0.8) solid;
   padding: 0;
   flex-basis: 10%;
-  height: 35px;
+  height: 10%;
   width: 10%;
   text-align: justify;
 }
@@ -156,15 +153,16 @@ div.grid-missed {
 
 
 button {
-  width: 90px;
-  height: 40px;
+  width: 80px;
+  height: 25px;
   border: none;
   font-family: Courier, monospace;
   background-color: rgb(119, 136, 153);
   border-radius: 5px;
   font-size: 0.8rem;
+  font-weight: bold;
   box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.2);
-  margin-bottom: 5px;
+  margin: 2px 0;
 }
 
 button:active {
@@ -189,7 +187,7 @@ button:active {
 .fleets div {
   font-family: Courier, 'Courier New', monospace;
   font-weight: bold;
-  width: 15%;
+  width: 16%;
   background-color: rgb(100, 127, 153);
   margin: 5px;
   border-radius: 5px;
@@ -242,19 +240,24 @@ div.fleet-destroyed:after {
 .panel {
   background-color: black;
   text-align: center;
-  min-height: 60px;
+  width: 100%;
+}
+.bot-container .panel {
+  flex: 1;
+}
+.player-container .panel {
+  flex: 2.2;
 }
 
-.overlay {
-  /* Height & width depends on how you want to reveal the overlay (see JS below) */   
+.overlay { 
   height: 0;
   width: 100%;
-  position: fixed; /* Stay in place */
+  position: fixed;
   z-index: 2; /* Sit on top */
   left: 0;
   top: 0;
   /* overflow-x: hidden; Disable horizontal scroll */
-  transition: 0.7s; /* 0.5 second transition effect to slide in or slide down the overlay (height or width, depending on reveal) */
+  transition: 0.4s;
   display: flex;
   justify-content: center;
 }
@@ -266,19 +269,16 @@ div.fleet-destroyed:after {
   justify-content: center;
   align-items: center;
   top: 30%; /* 25% from the top */
-  /* max-width: 90vw; */
-  /* width: 100%; */
+  background-color: rgb(0, 0, 0); /* Black fallback color */
+  background-color: rgba(0, 0, 0, 0.8); /* Black w/opacity */
   overflow-y: scroll;
   width: 100%;
   max-height: 15vh;
-  background-color: rgb(0,0,0); /* Black fallback color */
-  background-color: rgba(0,0,0, 0.8); /* Black w/opacity */
+  font-size: 1.4rem;
   text-align: center; /* Centered text/links */
 }
 
-.overlay-content {
-  font-size: 1.5rem;
-}
+
 .overlay-content a {
   display: none;
 }
@@ -289,6 +289,7 @@ div.fleet-destroyed:after {
 }
 
 footer {
+  margin-top: 20px;
   background-color: rgba(0, 0, 0, 0.8);
   width: 100%;
 }
@@ -299,57 +300,79 @@ footer p:first-of-type {
   margin-bottom: 5px;
 }
 
-@media only screen and (max-width:1050px){
-  .responsive-width {
-    width: 650px;
+@media only screen and (max-width:1000px){
+
+  h1 {
+    font-size: 3.5rem;
   }
 
-  .panel {
-    background-color: black;
-    text-align: center;
-    min-height: 60px;
+  .responsive-width {
+    width: 65vw;
+    height: 850px;
+  }
+
+  .player-container, .bot-container {
+    border: 18px solid black;
+  }
+
+  div.message {
+    height: auto;
+    max-height: auto;
+    font-size: 1.1rem;
   }
 
   .hinge {
     width: 400px;
-    height: 20px;
   }
 
   .fleets span {
-    margin: 2px 5px;
-    font-weight:normal;
+    margin: 1px 2px;
     font-size: 20px;
-    height: 20px;
-  }
-  
-  .fleets div {
-    width: 100px;
-    margin: 2px;
+    height: 10px;
   }
 
-  .player-grid div, .bot-grid div {
-    height: 25px;
+  .fleets p {
+    font-size: 10px;
   }
 
   .player-container {
-    transform: perspective(1400px) rotateX(40deg) scale(1.15) translateY(-80px);
+    transform: perspective(1400px) rotateX(40deg) scale(1.15) translateY(-65px);
   }
 }
 
 @media only screen and (max-width:650px){
 
+  header {
+    margin-bottom: 1rem;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+  }
+
+  .responsive-width {
+    width: 95vw;
+    min-height: auto;
+  }
+
+  div.message {
+    font-size: 0.95rem;
+  }
+
+  .fleets div {
+    font-family: Courier, 'Courier New', monospace;
+    font-weight: bold;
+    width: 30%;
+  }
+
+  .fleets {
+    justify-content: space-evenly;
+  }
+
   footer {
     margin-top: 20px;
   }
 
-  .hinge {
-    width: 300px;
-    height: 15px;
-  }
-
-  .responsive-width {
-    width: 580px;
-  }
   .player-container {
     transform: scale(1);
   }
