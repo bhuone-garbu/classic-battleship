@@ -11,9 +11,8 @@ const CSS_FLEET_SELECT = 'fleet-select'
 const CSS_FLEET_DEPLOYED = 'deployed'
 
 let AXIS = 'H' // 'V'
-const switchAxis = () => AXIS = AXIS === 'H' ? 'V' : 'H' // this just flips the axis
 
-const DEBUG = false
+const DEBUG = true
 
 let currentPlayingAudio
 let muteSound = false
@@ -28,6 +27,25 @@ const FLEET_SIZE_INFO = {
   submarine: 2
 }
 
+const switchAxis = () => {
+  AXIS = AXIS === 'H' ? 'V' : 'H' // this just flips the axis
+  const axisSpan = document.querySelector('.player-container .screen span')
+  axisSpan.innerHTML = AXIS === 'H' ? 'Horizontal' : 'Vertical'
+}
+
+const playSoundById = (audioId) => {
+
+  if (!muteSound){
+    if (currentPlayingAudio && currentPlayingAudio.Id !== 'fleetSelect') {
+      currentPlayingAudio.currentTime = 0
+      currentPlayingAudio.pause()
+    }
+  
+    currentPlayingAudio = document.getElementById(audioId)
+    currentPlayingAudio.play()
+  }
+
+}
 
 // utility functions for returning x and y coordinate from index and vice versa
 const getXYCoordinatesFromIndex = (gridIndex, boardWidth) => [gridIndex % boardWidth, Math.floor(gridIndex / boardWidth)]
@@ -477,7 +495,7 @@ class Game {
       }
       this.checkGameEnded()
       this.addAttackableClickEventsForPlayerGrids()
-    }, 600)
+    }, 300)
   }
 
   
@@ -533,7 +551,6 @@ class Game {
 
   deployBotFleets(playableFleets){
     this.bot.deployFleetsRandomly(this.width, playableFleets)
-    // deployedCoordinates.forEach( index => this.botDivs[index].classList.add(CSS_GRID_SELECT))
     this.addAttackableClickEventsForPlayerGrids(true)
   }
 
@@ -542,20 +559,25 @@ class Game {
     this.gameEnded = botWon || this.bot.hasNoMoreFleetRemaining()
     if (this.gameEnded) {
       console.log('game ended')
-      const who = botWon ? 'Bot' : 'You'
-      showOverlay(`${who} won!!!`, true)
+      const result = botWon ? 'You lost!!!' : 'You won!!!'
+      showOverlay(result, true)
 
       if (!muteSound){
-        // if (currentPlayingAudio) {
-        //   currentPlayingAudio.currentTime = 0
-        //   currentPlayingAudio.pause()
-        // }
+        if (currentPlayingAudio) {
+          currentPlayingAudio.currentTime = 0
+          currentPlayingAudio.pause()
+        }
         currentPlayingAudio = botWon ? document.getElementById('loseSound') : document.getElementById('winSound')
         currentPlayingAudio.currentTime = 0
         currentPlayingAudio.play()
       }
     }
   }
+}
+
+
+function hideOverlay() {
+  document.querySelector('div.overlay').style.height = '0%'
 }
 
 function showOverlay(msg, showReloadOption = false) {
@@ -566,17 +588,16 @@ function showOverlay(msg, showReloadOption = false) {
   }
   
   if (showReloadOption){
-    document.querySelector(`${selector} a`).style.display = 'inline'
     document.querySelector('div.overlay').removeEventListener('click', hideOverlay)
+    document.querySelector(`${selector} a`).style.display = 'inline'
+    console.log()
   }
 
   document.querySelector(selector).style.height = '100%'
 }
 
 
-function hideOverlay() {
-  document.querySelector('div.overlay').style.height = '0%'
-}
+
 
 function toggleGameRulesDisplay() {
   const rulesDiv = document.querySelector('.game-rules div')
@@ -588,7 +609,10 @@ function toggleGameRulesDisplay() {
 }
 
 // DOM Hook
-window.addEventListener('DOMContentLoaded', () => {
+// window.addEventListener('DOMContentLoaded', () => {
+
+// All res load event hook
+window.addEventListener('load', () => {
 
   console.log('This is battleship developed by bhuone-garbu')
   console.log('https://github.com/bhuone-garbu/classic-battleship')
@@ -596,6 +620,7 @@ window.addEventListener('DOMContentLoaded', () => {
   if (!DEBUG) console.log = function() {}
 
   let lastClickedFleetDiv
+  let lastRelativeCoordinates
 
   // this array is the source of truth for array of 'fleet' that was used in the game
   const playableFleets = []
@@ -603,18 +628,7 @@ window.addEventListener('DOMContentLoaded', () => {
   const game = new Game(10)
   game.createGrid()
 
-  document.querySelector('div.overlay').addEventListener('click', () => {
-    hideOverlay()
-    if (!muteSound){
-      // if (currentPlayingAudio) {
-      //   currentPlayingAudio.currentTime = 0
-      //   currentPlayingAudio.pause()
-      // }
-      currentPlayingAudio = document.getElementById('themeSound')
-      currentPlayingAudio.currentTime = 0
-      currentPlayingAudio.play()
-    }
-  })
+  document.querySelector('div.overlay').addEventListener('click', hideOverlay)
 
   // this won't be visible until game over
   document.querySelector('.overlay-content a').addEventListener('click', () => {
@@ -647,6 +661,7 @@ window.addEventListener('DOMContentLoaded', () => {
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
     indexCoordinates.forEach( index => game.playerDivs[index].classList.remove(CSS_GRID_HOVER))
+
   }
   
   function deployMouseclick(e) {
@@ -656,10 +671,11 @@ window.addEventListener('DOMContentLoaded', () => {
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
     if (!indexCoordinates.some( index => game.humanPlayer.allFleetsCoordinates.includes(index))){
 
+      playSoundById('fleetPlacement')
+
       indexCoordinates.forEach( index => {
         game.playerDivs[index].classList.remove(CSS_GRID_HOVER)
         game.playerDivs[index].classList.add(CSS_GRID_SELECT)
-        
       })
 
       // remove the hover effect and add the deployed css
@@ -677,30 +693,46 @@ window.addEventListener('DOMContentLoaded', () => {
       lastClickedFleetDiv.removeEventListener('click', addMouseOverOutClickEventInGrid)
 
       if ( --totalShipsToDeploy === 0) {
-        startAttacking()
+        startGame()
+        playSoundById('themeSound')
+        showOverlay('Your enemy has deployed their fleets. Start attacking now! Goodluck!')
       }
-    } 
+    }
   }
 
-  function startAttacking(){
+  function startGame(){
     game.deployBotFleets(playableFleets)
-    rotateBtn.style.display = 'none'
     const botFleets = document.querySelectorAll('.bot-container .fleets div')
     botFleets.forEach( div => div.classList.add(CSS_FLEET_DEPLOYED))
-    showOverlay('Bot has deployed its fleets. Start attacking now! Goodluck!')
+
+    document.querySelector('.bot-grid').style.visibility = 'visible'
+    document.querySelector('.bot-container .fleets').style.display = 'flex'
+    // document.querySelector('.axis').style.display = 'none'
   }
 
   function predeployMouseover(e){
+
     const shipLength = FLEET_SIZE_INFO[lastClickedFleetDiv.id]
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
 
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
-    indexCoordinates.forEach( index => game.playerDivs[index].classList.add(CSS_GRID_HOVER))
+    if (!lastRelativeCoordinates || lastRelativeCoordinates.some( coordinate => !indexCoordinates.includes(coordinate))) {
+      playSoundById('fleetMouseOver')
+    }
+
+    indexCoordinates.forEach( index => {
+      game.playerDivs[index].classList.add(CSS_GRID_HOVER)
+    })
+    lastRelativeCoordinates = indexCoordinates
   }
 
   function addMouseOverOutClickEventInGrid(e){
     // record this for later
-    if (!playableFleets.includes(e.currentTarget.id)) playableFleets.push(e.currentTarget.id)
+    if (!playableFleets.includes(e.currentTarget.id)){
+      playableFleets.push(e.currentTarget.id)
+    }
+
+    playSoundById('fleetSelect')
 
     if (lastClickedFleetDiv && !lastClickedFleetDiv.classList.contains(CSS_FLEET_DEPLOYED)){
       lastClickedFleetDiv.classList.add(CSS_FLEET_PREDEPLOY)
@@ -726,8 +758,10 @@ window.addEventListener('DOMContentLoaded', () => {
     shipDiv.addEventListener('click', addMouseOverOutClickEventInGrid)
   })
 
-  
   // rotate means we just need to switch the axis so mouseover, mouseout and click event listener will be reflected based on that
-  rotateBtn.addEventListener('click', switchAxis) 
+  rotateBtn.addEventListener('click', () => {
+    switchAxis()
+    playSoundById('axisRotate')
+  }) 
 
 })

@@ -14,17 +14,23 @@
 </head>
 
 <body>
+  <audio id="themeSound" src="res/sounds/main-theme.mp3" loop></audio>
+  <audio id="loseSound" src="res/sounds/defeat-short.mp3"></audio>
+  <audio id="winSound" src="res/sounds/win-short.mp3"></audio>
+  <audio id="fleetMouseOver" src="res/sounds/grid-mouseover.mp3"></audio>
+  <audio id="fleetPlacement" src="res/sounds/fleet-placement.mp3"></audio>
+  <audio id="fleetSelect" src="res/sounds/fleet-select.mp3"></audio>
+  <audio id="axisRotate" src="res/sounds/rotate.mp3"></audio>
 
   <header>
     <h1>Navy Battleship</h1>
   </header>
 
-
   <div class="overlay">
     <div class="overlay-content">
       <div class="message">
         <p></p>
-        <a href="#">&nbsp;Play again?</a>
+        <a>&nbsp;Play again?</a>
       </div>
     </div>
   </div>
@@ -52,7 +58,7 @@
   <div class="main-container responsive-width">
     <section class="bot-container">
       <div class="screen">
-        <p>Bot</p>
+        <p>Enemy fleets coordinates</p>
         <div class="bot-grid"></div>
       </div>
       <div class="panel">
@@ -85,14 +91,16 @@
         </div>
       </div>
     </section>
-    <section class="hinge"></section>
+
     <section class="player-container">
       <div class="screen">
-        <p>Player&nbsp;<button id="rotateBtn" disabled>Rotate</button></p>
+        <p>Player fleets coordinates</p>
         <div class="player-grid"></div>
+        <div class="axis">
+          <button id="rotateBtn" disabled>Rotate Axis</button><span>Horizontal</span>
+        </div>
       </div>
       <div class="panel">
-        
 
         <div class="fleets">
           <div id="battleship" class="predeploy">
@@ -128,21 +136,18 @@
 
   <footer>
     <div>
-      <p>Credits</p><br><br>
       <p>Icons used on the board grids were from <a target="_bank" href="https://www.flaticon.com/"
           title="Flaticon">www.flaticon.com</a></p>
       <p>Navy ships fonts were from <a target="_blank" href="https://www.fontsc.com/font/us-navy">www.fontsc.com</a></p>
-      <p>Audio sounds were from <a target="_blank" href="https://downloads.khinsider.com">downloads.khinsider.com</a></p>
-      <br><br><br>
-      <p>Developed by <a target="_blank" href="https://github.com/bhuone-garbu">bhuone-garbu</a></p>
+      <p>Back audio sounds were from <a target="_blank"
+          href="https://downloads.khinsider.com">downloads.khinsider.com</a></p>
+      <br>
+      <p>Developed by <a target="_blank" href="https://github.com/bhuone-garbu">bhuone-garbu</a> using Javascript and
+        CSS/Flexbox - no frameworks/library used</p>
       <p>Click <a target="_blank" href="https://github.com/bhuone-garbu/classic-battleship">here</a> to view github
         repository for this game</p>
     </div>
   </footer>
-
-  <audio id="loseSound" src="res/sounds/defeat-short.mp3"></audio>
-  <audio id="winSound" src="res/sounds/win-short.mp3"></audio>
-  <audio id="themeSound" src="res/sounds/main-theme.mp3"></audio>
 
 </body>
 

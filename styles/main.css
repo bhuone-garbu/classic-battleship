@@ -15,10 +15,12 @@
 a {
   text-decoration: none;
   color: rgb(248, 188, 39);
+  cursor: pointer;
 }
 
 
-.game-rules a{
+.game-rules a {
+  font-size: 1.5rem;
   border-top: 2px white solid;
   border-bottom: 2px white solid;
 }
@@ -86,8 +88,6 @@ header {
 .main-container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh;
-  height: 1050px;
   max-width: 850px;
 }
 
@@ -98,23 +98,14 @@ header {
   /* height: 60%; */
   border: 25px solid black;
   border-radius: 20px;
-  /* width: 700px; */
   width: 100%;
   box-shadow: 0 0 25px 0 rgba(0, 0, 0, 0.8);
-  flex-grow: 1;
 }
 
 .player-container {
-  transform: perspective(1400px) rotateX(35deg) scale(1.12) translateY(-70px);
+  transform: perspective(1400px) rotateX(30deg) scale(1.12) translateY(-20px);
 }
 
-.hinge {
-  flex-basis: 2%;
-  border-right: 40px black solid;
-  border-left: 40px black solid;
-  width: 600px;
-  margin: 0 auto;
-}
 
 .screen {
   width: 100%;
@@ -125,28 +116,22 @@ header {
 }
 
 
-
 .player-grid, .bot-grid {
   margin: 0 auto;
-  display:-webkit-flex;
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
   max-width: 70%;
-  height: 90%;
-  /* min-height: 180px; */
-  min-width: 180px;
+  min-height: 300px;
   background-color: rgba(100, 127, 153, 0.6);
 }
-
 
 .player-grid div, .bot-grid div {
   border: 2px rgba(0, 0, 0, 0.8) solid;
   padding: 0;
   flex-basis: 10%;
-  height: 10%;
-  width: 10%;
+  min-height: 30px;
   text-align: justify;
 }
 
@@ -166,7 +151,6 @@ div.grid-missed {
   background-position: center;
   background-repeat: no-repeat;
 }
-
 
 .default-grid-color {
   background-color: rgba(68, 125, 143, 0.2);
@@ -193,13 +177,20 @@ div.grid-missed {
   background-color: rgba(248, 188, 39, 0.8);
 }
 
+.screen div * {
+  font-family: Courier, monospace;
+}
 
-.screen p, .screen button {
+.screen p, .screen div * {
   font-size: 1.4rem;
 }
 
+.axis {
+  margin: 10px 0;
+}
+
 button {
-  width: 90px;
+  padding: 2px 5px;
   height: 100%;
   border: none;
   font-family: Courier, monospace;
@@ -240,6 +231,10 @@ button:active {
 }
 
 /* fleet pre-deployed when fleet is clicked */
+div.predeploy {
+  animation: fleet-move 2s infinite linear;
+}
+
 div.predeploy:hover {
   transform: scale(1.05);
 }
@@ -264,6 +259,7 @@ div.fleet-destroyed {
   position: relative;
   background: black;
   color: white;
+  animation: shake 0.5s;
 }
 
 div.fleet-destroyed:after {
@@ -285,6 +281,14 @@ div.fleet-destroyed:after {
   text-align: center;
   width: 100%;
   flex: 1
+}
+
+.bot-grid {
+  visibility: hidden;
+}
+
+.bot-container .fleets {
+  display: none;
 }
 
 .overlay { 
@@ -332,12 +336,42 @@ footer {
   width: 100%;
   flex-grow: 1;
   padding: 30px 10px;
+  font-size: 0.95rem;
 }
 
-footer p:first-of-type {
-  font-weight: 900;
-  text-transform: uppercase;
+@keyframes fleet-move {
+  0% {
+    transform: scale(1)
+  }
+  25% {
+    transform: scale(0.95)
+  }
+  77%{
+    transform: scale(1.05)
+  }
+  100% {
+    transform: scale(1)
+  }
 }
+
+@keyframes shake {
+  10%, 90% {
+    transform: translate3d(-2px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(4px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-8px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(8px, 0, 0);
+  }
+}
+
 
 @media only screen and (max-width:1000px){
 
@@ -357,48 +391,48 @@ footer p:first-of-type {
 
   .player-container, .bot-container {
     border: 18px solid black;
-    min-height: 50%;
-  }
-
-  .hinge {
-    width: 400px;
-    max-width: 60%;
-    flex-basis: 2%;
   }
 
   .fleets span {
     margin: 1px 2px;
-    font-size: 20px;
+    font-size: 25px;
     height: 10px;
     max-width: 90%;
   }
 
-  .fleets p {
-    font-size: 10px;
-  }
   .panel {
     flex-grow: 1;
   }
 
   .player-container {
-    transform: perspective(1400px) rotateX(40deg) scale(1.15) translateY(-75px);
+    transform: perspective(1400px) rotateX(30deg) scale(1.11) translateY(-20px);
   }
 }
 
 @media only screen and (max-width:850px){
 
+  .fleets p {
+    font-size: 10px;
+  }
+
   .fleets span {
-    font-size: 15px;
+    font-size: 20px;
   }
-  .screen p, button {
-    font-size: 1.1rem;
+
+  .screen p, .screen div * {
+    font-size: 1rem;
   }
+
+  footer {
+    font-size: 0.8rem;
+  }
+
 }
 
 @media only screen and (max-width:650px){
 
-  .screen p, .screen button {
-    font-size: 1rem;
+  .player-grid, .bot-grid {
+    max-width: 88%;
   }
 
   header {
@@ -415,7 +449,6 @@ footer p:first-of-type {
 
   .responsive-width {
     width: 95vw;
-    min-height: 850px;
   }
 
   .message {
@@ -438,15 +471,11 @@ footer p:first-of-type {
 
   .panel {
     padding: 0 1.5rem;
-    min-height: 150px;
-  }
-
-  footer {
-    margin-top: 20px;
   }
 
   .player-container {
     transform: scale(1);
+    margin-top: 1rem;
   }
 }
 
@@ -456,14 +485,10 @@ footer p:first-of-type {
     padding: 0 0.5rem;
   }
 
-  .screen p, .screen button {
+  .screen p, .screen div * {
     font-size: 0.8rem;
   }
-
-  /* button {
-    font-size: 0.rem;
-  } */
-
+  
   .bot-container .panel {
     flex: 1;
   }
