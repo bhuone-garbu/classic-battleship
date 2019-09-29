@@ -1,8 +1,12 @@
 # Classic Battleship
 
-A JS browser game
+A browser based classic battleship game written in pure Vanilla Javascript - using CSS/Flexbox for layout and display.
 
-## Design, wireframe and concepts
+## Design and concepts
+In my head, the concept was the make a command center briefcase like we see on the movies for this game. 
+![Command center suitcase](https://i.imgur.com/004i4KS.png)
+
+And that was it for my inspiration for making the layout into this.
 
 
 
@@ -19,9 +23,10 @@ A JS browser game
 ## Planned features
 * Redeploy the ships
 * More controls for mobile, touch screen and feedbacks
-* More responsive design for smaller design - tidy up.
+* More responsive design for smaller design - tidying up.
 * Allow the user to redeploy a mistakenly placed fleet.
-* Implement a better search function instead of random - as the game progresses, the probability of a fleet being on a certain area increases.
+* Implement a better search function instead of random for the bot - as the game progresses, the probability of a fleet being on a certain area increases.
+* Support more cells on the board and shootout mode with limited attacks available.
 
 ## Conveats
 The game was meant to be played on desktop. Should the user wish to play the game on mobile, this is still fine. However, any mouseover effects won’t be available on touch screen device. The user can still use the **rotate** button to rotate the placement but it might not be obvious. The grid `div` element were created programmatically from javascript and the code uses ES6 arrow syntax. So Safari is completely off the table as I’ve noticed some version of Safari browser does not support that arrow syntax hence `div`s won’t even be generated.
