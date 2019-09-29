@@ -1,15 +1,24 @@
 # Classic Battleship
 
-A browser based classic battleship game written in pure Vanilla Javascript - using CSS/Flexbox for layout and display.
+A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display.
 
 ## Design and concepts
-In my head, the concept was the make a command center briefcase like we see on the movies for this game. 
+In my head, the concept was to make a command center briefcase like we see on the movies for this game. :joy:
 ![Command center suitcase](https://i.imgur.com/004i4KS.png)
 
-And that was it for my inspiration for making the layout into this.
+And that was my inspiration for making the current layout.
 ![Desktop view of the board](/res/images/screenshots/desktop-view.png?raw=true "Desktop view")
 
-There are lots of things I wanted to try like animations but the game itself and logic was my priority. However, for screen that are too small, the prospective is removed.
+There are lots of things I wanted to try like animations but the game itself and logic was my priority. So simplicity, I opted for a darker theme and _modern_-like look and feel.
+
+I used the following CSS property to get the prespective effect for the bottom player container.
+```css
+.player-container {
+  transform: perspective(1400px) rotateX(30deg) scale(1.12) translateY(-20px);
+}
+```
+
+However, for screen width that are too small, the prespective was removed as it didn't make sense.
 <p align="center">
   <img src="/res/images/screenshots/mobile-view.png" width="400px" alt="Mobile view">
 </p>
@@ -21,7 +30,9 @@ To get the `X` and `Y` from an `divIndex`, the following math is be used:
 const x = divIndex % boardWidth
 const y = Math.floor(divIndex / boardWidth)
 ```
-where `boardWidth` is the total number of columns of the board. For now, it's 10x10 grid system so number of rows is equal to columns. So on CSS, a `flex` display was used with `wrap` and `flex-basis` of 10% for the child `div`s so that thre is always 10 items on each rows.
+where `boardWidth` is the total number of columns of the board. For now, it's 10x10 grid system so number of rows is equal to columns.
+
+Since it's a 10x10 grid, on CSS, `flex` display was used with `wrap` on the parent container and `flex-basis` of 10% for the child `div`s so that thre is always 10 items on each rows.
 
 ```css
 .player-grid, .bot-grid {
@@ -38,29 +49,39 @@ where `boardWidth` is the total number of columns of the board. For now, it's 10
 }
 ```
 
-Then the rest is just maths and DOM manupulation from javascript to add/remove CSS classes and styles
-
+Once I knew how to navigate the `div`s using these maths, the rest was just simply listening for events and manupulating the DOM from Javascript to add/remove CSS classes and styles appropriately.
 
 ## Rules
-* 2 players in total - each player deploys all their ships on the 2x2 coordinates
+* 2 players in total - each player deploys all their ships on the 10x10 board.
+* Player can click any of the ships and then click on board to deploy. The axis can be roated by pressing the `rotate` button on the grid.
+* Ships cannot be deployed over previously chosen deployed ship coordinates. The UI won't allow you. :wink: 
 * The bot will randomly choose its coordinates deploy all its ships as well after the player finishes deploying.
-* Each player takes turn to attack at opponents coordinates to destroy all their ships - the (human) player start first
+* Each player takes turn to attack at opponents coordinates to destroy all their ships - the (human) player start first.
+* The game will tell which ship was destroyed - that's given.
 * Whoever destroys all the opponents before wins the game. Simple!
 
 ## Bot logic (pseudo algorithm)
-1. Scan the board for not previously hit coordinates and attack at random until a coordinate is found for one of the fleets. The bot records all the coordinates that it attacked to not hit the same coordinate twice.
-2. If a **hit** coordinate is found, attack its top, right, bottom and left side until another **hit** coordinate is found. This way, the fleet placement axis - horizontal or vertical - can be found.
-3. Keep attacking the axis until the fleet is destroyed. If by any chance, the bot reaches the end of the coordinate and the fleet isn’t destroyed, try the other end until the fleet is destroyed. Record the destroyed fleet coordinates.
-4. During the process, if the bot happen to hit any other coordinates that was not the destroyed fleet coordinates - this can happen when fleets are place in adjacent coordinates - repeat **2** from the hit coordinates until the fleet(s) are destroyed.
-5. Else, start from **1** again keeping in mind to not attack *tight coordinates*  because it is just a waste. *Tight coordinates* are ones where it’s top, right, bottom and left coordinates have already been attacked.
+There are lots of improvements that could be done for the bot intelligence. Here is my current implementation for the bot's logic:
+
+1. Scan the board for not previously hit coordinates and attack at random until a coordinate is found for one of the opponents' ships. The bot records all the coordinates that it attacked to not hit the same coordinate twice.
+2. If a **hit** coordinate was found, attack either of its top, right, bottom and left side that was not attacked until another **hit** coordinate is found. This way, the ship placement axis - horizontal or vertical - can be determined.
+3. Keep attacking the axis until the ship is destroyed. If, by any chance, the bot reaches the end of the coordinate and the ship isn’t destroyed, try the other end until the ship is destroyed. Record the destroyed ship coordinates.
+4. During the process, if the bot happen to hit any other coordinates that was not the destroyed ship coordinates - this can happen when ships are place in adjacent coordinates - it will repeat the process from point **2** from the hit coordinates until the ship is destroyed again.
+5. Else, start from **1** again keeping in mind to not attack *tight coordinates* because there won't be any ship. *Tight coordinates* are ones where it’s top, right, bottom and left coordinates have already been attacked.
+
+This should more or less match human decision making for attacking the coordinates except for random attacks.
 
 ## Planned features
 * Redeploy the ships
-* More controls for mobile, touch screen and feedbacks
-* More responsive design for smaller design - tidying up.
-* Allow the user to redeploy a mistakenly placed fleet.
-* Implement a better search function instead of random for the bot - as the game progresses, the probability of a fleet being on a certain area increases.
-* Support more cells on the board and shootout mode with limited attacks available.
+* More controls for mobile and touch screen
+* More responsive design for smaller design - tidying up the CSS a notch.
+* Allow the user to redeploy a ship in case the player made a mistake.
+* Implement a better search function for bot instead of random attack. As the game progresses, the probability of a ship being on a certain area increases since we know which ships are remanining on the board.
+* Support more cells on the board and shootout mode with limited attacks.
 
-## Conveats
-The game was meant to be played on desktop. Should the user wish to play the game on mobile, this is still fine. However, any mouseover effects won’t be available on touch screen device. The user can still use the **rotate** button to rotate the placement but it might not be obvious. The grid `div` element were created programmatically from javascript and the code uses ES6 arrow syntax. So Safari is completely off the table as I’ve noticed some version of Safari browser does not support that arrow syntax hence `div`s won’t even be generated.
+## Caveats
+The game was meant to be played on desktop. Should the user wish to play the game on mobile, this is still fine. However, any mouseover effects won’t be available on touch screen device unless they **long press** and hold on the cell.
+
+The code uses ES6 arrow syntax for functions. I’ve noticed some version of Safari browser does not support that arrow syntax hence `div`s won’t even be generated. So Safari is completely off the table.
+
+Recommended browser: **Chrome**
