@@ -3,7 +3,7 @@
 A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display.
 
 ## Design and concepts
-In my head, the concept was to make a command center briefcase like we see on the movies for this game. :joy:
+In my head, the concept was to make a command center briefcase like we see on the movies for this game. :joy: :joy: :joy:
 ![Command center suitcase](https://i.imgur.com/004i4KS.png)
 
 And that was my inspiration for making the current layout.
