@@ -25,13 +25,6 @@ However, for screen width that are too small, the prespective was removed as it 
 
 The `div`s for the grid on both sides are dynamically created from javascript and stored in an array. It's a single array of `div` items - no 2D array is used to keep it simple.
 
-To get the `X` and `Y` from an `divIndex`, the following math is be used:
-```javascript
-const x = divIndex % boardWidth
-const y = Math.floor(divIndex / boardWidth)
-```
-where `boardWidth` is the total number of columns of the board. For now, it's 10x10 grid system so number of rows is equal to columns.
-
 Since it's a 10x10 grid, on CSS, `flex` display was used with `wrap` on the parent container and `flex-basis` of 10% for the child `div`s so that thre is always 10 items on each rows.
 
 ```css
@@ -48,6 +41,13 @@ Since it's a 10x10 grid, on CSS, `flex` display was used with `wrap` on the pare
   min-height: 30px;
 }
 ```
+
+To get the `X` and `Y` from an `divIndex`, the following math is be used:
+```javascript
+const x = divIndex % boardWidth
+const y = Math.floor(divIndex / boardWidth)
+```
+where `boardWidth` is the total number of columns of the board. For now, it's 10x10 grid system so number of rows is equal to columns. While these `x` and `y` coordinates does not really need to be calculated, it helps with semantics and logical way of reasoning.
 
 Once I knew how to navigate the `div`s using these maths, the rest was just simply listening for events and manupulating the DOM from Javascript to add/remove CSS classes and styles appropriately.
 
