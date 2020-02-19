@@ -1,6 +1,5 @@
 
 // CSS global class name constants
-// const CSS_DEFAULT_GRID_COLOR = 'default-grid-color'
 const CSS_GRID_HOVER = 'grid-hightlight'
 const CSS_GRID_SELECT = 'grid-select'
 const CSS_GRID_ATTACKED = 'grid-attacked'
@@ -15,7 +14,7 @@ let AXIS = 'H' // 'V'
 const DEBUG = true
 
 let currentPlayingAudio
-let muteSound = false
+const muteSound = false
 
 // initial fleet name as key and value as the size of the fleet - size as in the nuber of cells it takes on the grid
 // ths does not mean that all these fleets will be used
@@ -27,13 +26,13 @@ const FLEET_SIZE_INFO = {
   submarine: 2
 }
 
-const switchAxis = () => {
+function switchAxis() {
   AXIS = AXIS === 'H' ? 'V' : 'H' // this just flips the axis
   const axisSpan = document.querySelector('.player-container .screen span')
   axisSpan.innerHTML = AXIS === 'H' ? 'Horizontal' : 'Vertical'
 }
 
-const playSoundById = (audioId) => {
+function playSoundById(audioId) {
 
   if (!muteSound){
     if (currentPlayingAudio && currentPlayingAudio.Id !== 'fleetSelect') {
@@ -48,8 +47,13 @@ const playSoundById = (audioId) => {
 }
 
 // utility functions for returning x and y coordinate from index and vice versa
-const getXYCoordinatesFromIndex = (gridIndex, boardWidth) => [gridIndex % boardWidth, Math.floor(gridIndex / boardWidth)]
-const getIndexFromXYCoordinates = (x, y, boardWidth) => y * boardWidth + x
+function getXYCoordinatesFromIndex(gridIndex, boardWidth){
+  return [gridIndex % boardWidth, Math.floor(gridIndex / boardWidth)]
+}
+
+function getIndexFromXYCoordinates(x, y, boardWidth){
+  return y * boardWidth + x
+}
 
 // We always want to return valid coordinates no matter what the size of the ship and no matter where the users hovers or clicks on the grid
 function calcRelativeCoordinates(currentDivIndex, boardWidth, shipSize){
@@ -93,20 +97,31 @@ function calcRelativeCoordinates(currentDivIndex, boardWidth, shipSize){
 function buildAdjacentCoordinates(previousAttackCoordinates, filterCoordinates){
 
   // try horizontal first
-  const filtered = previousAttackCoordinates.filter( index => !filterCoordinates || !filterCoordinates.includes(index))
-  console.log('filtered...', filtered)
-  // pick one
+  const filtered = previousAttackCoordinates.filter(function(index) {
+    return !filterCoordinates || !filterCoordinates.includes(index)
+  })
+
   const pivotIndexCoord = getIndexFromXYCoordinates(filtered[0])
 
-  const horizontal = filtered.filter( index => getIndexFromXYCoordinates(index)[1] === pivotIndexCoord[1])
+  const horizontal = filtered.filter(function(index){
+    return getIndexFromXYCoordinates(index)[1] === pivotIndexCoord[1]
+  })
+
   if (horizontal.length > 1){
-    horizontal.sort( (a,b) => a - b)
+    horizontal.sort(function(a,b){
+      return a - b
+    })
     return horizontal
   }
 
-  const vertical = filtered.filter( index => getIndexFromXYCoordinates(index)[0] === pivotIndexCoord[0])
+  const vertical = filtered.filter(function(index) {
+    return getIndexFromXYCoordinates(index)[0] === pivotIndexCoord[0]
+  })
+
   if (vertical.length > 1){
-    vertical.sort( (a,b) => a - b)
+    vertical.sort(function(a,b) {
+      return a - b
+    })
     return vertical
   }
 
@@ -123,7 +138,7 @@ function listPossibleDirection(pivotIndex, usedUpCoordinates, boardWidth, attack
   const xyCoordinate = getXYCoordinatesFromIndex(pivotIndex, boardWidth)
   
   // calculate all the possible neighbour coordinates that possible taking account of the attackAxis
-  const filtered = ['N', 'S', 'E', 'W'].filter( key => {
+  const filtered = ['N', 'S', 'E', 'W'].filter(function(key){
     if (!attackAxis){
       return true
     } else {
@@ -133,7 +148,7 @@ function listPossibleDirection(pivotIndex, usedUpCoordinates, boardWidth, attack
   })
 
   // we need to further check if the coordinate has already been used and within the board size
-  return filtered.reduce((acc, key) => {
+  return filtered.reduce(function(acc, key){
     switch (key){
       case 'N':
         if (xyCoordinate[0] === getXYCoordinatesFromIndex(pivotIndex - boardWidth, boardWidth)[0]){
@@ -186,7 +201,6 @@ function isTightFit(indexCoordinate, usedUpCoordinates, boardWidth){
 }
 
 
-
 class DeployedFleet {
 
   constructor(name, size, deployedCoordinates){
@@ -209,7 +223,6 @@ class DeployedFleet {
   isDestroyed(){
     return this.hitCoordinates.length === this.deployedCoordinates.length
   }
-
 }
 
 
@@ -225,7 +238,9 @@ class Player {
   }
 
   hasNoMoreFleetRemaining() {
-    return Object.keys(this.deployedFleets).every( fleetName => this.deployedFleets[fleetName].isDestroyed())
+    return Object.keys(this.deployedFleets).every(function(fleetName) {
+      return this.deployedFleets[fleetName].isDestroyed()
+    }.bind(this))
   }
 
   // accepts a coordinate and provides back with a fleet name from all the deployed fleets on the map grid
@@ -240,17 +255,17 @@ class Player {
   // at any point, player can be interrogated to report all the fleets that were destroyed!
   // basically a subset of all the fleets
   reportAllDestroyedFleets(){
-    return Object.keys(this.deployedFleets).reduce( (destroyedFleets, fleetName) => {
+    return Object.keys(this.deployedFleets).reduce(function(destroyedFleets, fleetName){
       if (this.deployedFleets[fleetName].isDestroyed()) destroyedFleets[fleetName] = this.deployedFleets[fleetName]
       return destroyedFleets
-    }, {} )
+    }.bind(this), {} )
   }
 
   reportAllDestroyedFleetsCoordinates(){
-    return Object.keys(this.deployedFleets).reduce( (acc, fleetName) => {
+    return Object.keys(this.deployedFleets).reduce(function(acc, fleetName){
       if (this.deployedFleets[fleetName].isDestroyed()) acc = acc.concat(this.deployedFleets[fleetName].deployedCoordinates)
       return acc
-    }, [] )
+    }.bind(this), [] )
   }
 }
 
@@ -316,22 +331,17 @@ class Bot extends Player {
 
     this.isBotConfused = false
 
-    // else
-    console.log('this.lastSuccessfulAttacks::', this.lastSuccessfulAttacks)
-    console.log('this.attackAxis::', this.attackAxis)
-
     const totalAttacks = this.lastSuccessfulAttacks.length
     let calcVector
     if (totalAttacks > 0){
       calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[totalAttacks - 1], this.allAttackedVectors, this.width, this.attackAxis)
-      console.log('Using calc vector::: ' + calcVector)
+      
       if (calcVector && calcVector === -1){
         // try again from differnt end
         calcVector = this.calculateSuitableAttackCoordinate(this.lastSuccessfulAttacks[0], this.allAttackedVectors, this.width, this.attackAxis)
-        console.log('Retrying using calc vector::: ' + calcVector)
       }
+
       if (calcVector === -1){
-        console.log('Bot is seriously confused...')
         this.isBotConfused = true
       }
     }
@@ -357,8 +367,6 @@ class Bot extends Player {
       if (test.length > 1) {
         this.lastSuccessfulAttacks = test
         this.attackAxis = calculateCoordinatesDirectionAxis(this.lastSuccessfulAttacks[0], this.lastSuccessfulAttacks[1], this.width)
-        console.log('buildAdjacentCoordinates...', this.lastSuccessfulAttacks)
-        console.log('this.destroyedFleetCoordinates...', this.destroyedFleetCoordinates)
       }
 
       fromLastAttacks = this.calculateFromLastSuccessfulAttacks()
@@ -368,13 +376,11 @@ class Bot extends Player {
 
     // else fallback to random attack
     const random = this.randomAttack()
-    console.log('Using random::: ', random)
     return random
   }
 
   storeLastSuccessfulAttack(hitIndex){
 
-    console.log('storing successful attack')
     this.lastSuccessfulAttacks.push(hitIndex)
     this.everySuccessfulAttacks.push(hitIndex)
     if (!this.attackAxis && this.lastSuccessfulAttacks.length > 1) {
@@ -387,7 +393,7 @@ class Bot extends Player {
   deployFleetsRandomly(gameWidth, playableFleets){
 
     // using arrow syntax to access 'this.allFleetsCoordinates' variable
-    playableFleets.forEach( fleetName => {
+    playableFleets.forEach(function(fleetName) {
 
       //let deployCoordinates = []
       AXIS = ['H', 'V'][Math.floor(Math.random() * 2 )] // randomly pick a axis
@@ -395,7 +401,10 @@ class Bot extends Player {
 
       // keep calculating until we get a spot that was not previously used
       let randomIndexCoordinates = calcRelativeCoordinates(randomIndex, gameWidth, FLEET_SIZE_INFO[fleetName])
-      while (randomIndexCoordinates.some(index => this.allFleetsCoordinates.includes(index))){
+      while (randomIndexCoordinates.some(function(index){
+        return this.allFleetsCoordinates.includes(index)
+      }.bind(this))){
+
         AXIS = ['H', 'V'][Math.floor(Math.random() * 2 )] // randomly pick a axis
         randomIndex = Math.floor(Math.random() * gameWidth ** 2 )
         randomIndexCoordinates = calcRelativeCoordinates(randomIndex, gameWidth, FLEET_SIZE_INFO[fleetName])
@@ -404,7 +413,7 @@ class Bot extends Player {
       // save the coordinates
       this.deployedFleets[fleetName] = new DeployedFleet(fleetName, FLEET_SIZE_INFO[fleetName], randomIndexCoordinates)
       this.allFleetsCoordinates = this.allFleetsCoordinates.concat(randomIndexCoordinates)
-    })
+    }.bind(this))
     
   }
 }
@@ -427,6 +436,8 @@ class Game {
     this.attackBot = true // true means it's human's turn and to attack the bot, false is otherwise
     //this.usedCoordinates = []
     this.gameEnded = false
+
+    this.attackableClickEvent = this.attackableClickEvent.bind(this)
   }
 
   createGrid() {
@@ -453,7 +464,7 @@ class Game {
   }
 
   // on click event
-  attackableClickEvent = (e) => {
+  attackableClickEvent(e) {
     
     const grids = this.attackBot ? this.botDivs : this.playerDivs
     const player = this.attackBot ? this.bot : this.humanPlayer
@@ -461,11 +472,14 @@ class Game {
 
     if (!this.bot.attackAttemptsCoordinates.includes(indexCoordinate)){
       if (this.checkAndMarkFleetHit(indexCoordinate, this.attackBot)){
-        console.log(player.reportAllDestroyedFleets())
+        player.reportAllDestroyedFleets()
       }
   
       // once clicked/attacked - we don't want to be able to clickable until the bot have attacked the human players as well
-      grids.forEach( grid => grid.removeEventListener('click', this.attackableClickEvent ))
+      grids.forEach(function(grid) {
+        grid.removeEventListener('click', this.attackableClickEvent )
+      }.bind(this))
+
       this.checkGameEnded()
       if (!this.gameEnded) {
         this.letBotAttackHuman()
@@ -475,14 +489,9 @@ class Game {
 
   letBotAttackHuman(){
     
-    console.log('\n\nBot about to attack....')
-    setTimeout(() => {
+    setTimeout(function() {
       const botAttackVector = this.bot.calculateNextAttackVector()
       const lastDesttoyedCount = this.humanPlayer.destroyedFleets
-      console.log('allAttackedVectors', this.bot.allAttackedVectors)
-      console.log('lastDestroyedFleets count', this.humanPlayer.destroyedFleets)
-      console.log('botAttackVector', botAttackVector)
-      console.log('Pushing ', botAttackVector, ' in all attacked vectors')
       this.bot.allAttackedVectors.push(botAttackVector)
       
       if (this.checkAndMarkFleetHit(botAttackVector, false)){
@@ -490,12 +499,11 @@ class Game {
         if (this.humanPlayer.destroyedFleets > lastDesttoyedCount){
           this.bot.destroyedFleetCoordinates = this.humanPlayer.reportAllDestroyedFleetsCoordinates()
           this.bot.resetAttackTactics() //reset after destroying
-          console.log('resetting')
         }
       }
       this.checkGameEnded()
       this.addAttackableClickEventsForPlayerGrids()
-    }, 300)
+    }.bind(this), 300)
   }
 
   
@@ -503,14 +511,15 @@ class Game {
   addAttackableClickEventsForPlayerGrids(isBot = true) {
     const grids = isBot ? this.botDivs : this.playerDivs
     if (!this.gameEnded) {
-      grids.forEach(grid => grid.addEventListener('click', this.attackableClickEvent))
+      grids.forEach(function(grid){
+        grid.addEventListener('click', this.attackableClickEvent)
+      }.bind(this))
     }
   }
 
   markFleetAsDestroyed(fleetName, isBot){
     const containerName = isBot ? '.bot-container' : '.player-container'
     const fleetDiv = document.querySelector(`${containerName} div #${fleetName}`)
-    console.log('query selector::: ', `${containerName} div #${fleetName}`)
     fleetDiv.classList.add('fleet-destroyed')
   }
 
@@ -557,8 +566,8 @@ class Game {
   checkGameEnded(){
     const botWon = this.humanPlayer.hasNoMoreFleetRemaining()
     this.gameEnded = botWon || this.bot.hasNoMoreFleetRemaining()
+
     if (this.gameEnded) {
-      console.log('game ended')
       const result = botWon ? 'You lost!!!' : 'You won!!!'
       showOverlay(result, true)
 
@@ -590,13 +599,10 @@ function showOverlay(msg, showReloadOption = false) {
   if (showReloadOption){
     document.querySelector('div.overlay').removeEventListener('click', hideOverlay)
     document.querySelector(`${selector} a`).style.display = 'inline'
-    console.log()
   }
 
   document.querySelector(selector).style.height = '100%'
 }
-
-
 
 
 function toggleGameRulesDisplay() {
@@ -609,10 +615,8 @@ function toggleGameRulesDisplay() {
 }
 
 // DOM Hook
-// window.addEventListener('DOMContentLoaded', () => {
-
 // All res load event hook
-window.addEventListener('load', () => {
+window.addEventListener('load', function() {
 
   console.log('This is battleship developed by bhuone-garbu')
   console.log('https://github.com/bhuone-garbu/classic-battleship')
@@ -631,14 +635,16 @@ window.addEventListener('load', () => {
   document.querySelector('div.overlay').addEventListener('click', hideOverlay)
 
   // this won't be visible until game over
-  document.querySelector('.overlay-content a').addEventListener('click', () => {
+  document.querySelector('.overlay-content a').addEventListener('click', function(){
     hideOverlay()
     location.reload()
   })
 
   document.querySelector('.game-rules a').addEventListener('click', toggleGameRulesDisplay)
 
-  setTimeout(() => showOverlay('Start deploying by clicking on your fleets!'), 300 )
+  setTimeout(function() {
+    showOverlay('Start deploying by clicking on your fleets!'), 300
+  })
   
   const rotateBtn = document.getElementById('rotateBtn')
   //const shipButtons = document.querySelectorAll('.ships button')
@@ -649,7 +655,7 @@ window.addEventListener('load', () => {
 
   // remove event listener
   function clearPlayer1EventListeners(){
-    game.playerDivs.forEach( div => {
+    game.playerDivs.forEach(function(div){
       div.removeEventListener('mouseover', predeployMouseover)
       div.removeEventListener('mouseout', predeployMouseout)
       div.removeEventListener('click', deployMouseclick)
@@ -660,8 +666,9 @@ window.addEventListener('load', () => {
     const shipLength = FLEET_SIZE_INFO[lastClickedFleetDiv.id]
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
-    indexCoordinates.forEach( index => game.playerDivs[index].classList.remove(CSS_GRID_HOVER))
-
+    indexCoordinates.forEach(function(index){
+      game.playerDivs[index].classList.remove(CSS_GRID_HOVER)
+    })
   }
   
   function deployMouseclick(e) {
@@ -669,11 +676,16 @@ window.addEventListener('load', () => {
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
 
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
-    if (!indexCoordinates.some( index => game.humanPlayer.allFleetsCoordinates.includes(index))){
+
+    function indexPresentInAllCoords(index){
+      return game.humanPlayer.allFleetsCoordinates.includes(index)
+    }
+
+    if (!indexCoordinates.some(indexPresentInAllCoords)){
 
       playSoundById('fleetPlacement')
 
-      indexCoordinates.forEach( index => {
+      indexCoordinates.forEach(function(index){
         game.playerDivs[index].classList.remove(CSS_GRID_HOVER)
         game.playerDivs[index].classList.add(CSS_GRID_SELECT)
       })
@@ -703,11 +715,12 @@ window.addEventListener('load', () => {
   function startGame(){
     game.deployBotFleets(playableFleets)
     const botFleets = document.querySelectorAll('.bot-container .fleets div')
-    botFleets.forEach( div => div.classList.add(CSS_FLEET_DEPLOYED))
+    botFleets.forEach(function(div){
+      div.classList.add(CSS_FLEET_DEPLOYED)
+    })
 
     document.querySelector('.bot-grid').style.visibility = 'visible'
     document.querySelector('.bot-container .fleets').style.display = 'flex'
-    // document.querySelector('.axis').style.display = 'none'
   }
 
   function predeployMouseover(e){
@@ -716,11 +729,13 @@ window.addEventListener('load', () => {
     const cellDivIndex = parseInt(e.target.getAttribute('index'))
 
     const indexCoordinates = calcRelativeCoordinates(cellDivIndex, game.width, shipLength)
-    if (!lastRelativeCoordinates || lastRelativeCoordinates.some( coordinate => !indexCoordinates.includes(coordinate))) {
+    if (!lastRelativeCoordinates || lastRelativeCoordinates.some(function(coordinate) {
+      return !indexCoordinates.includes(coordinate)
+    })) {
       playSoundById('fleetMouseOver')
     }
 
-    indexCoordinates.forEach( index => {
+    indexCoordinates.forEach(function(index){
       game.playerDivs[index].classList.add(CSS_GRID_HOVER)
     })
     lastRelativeCoordinates = indexCoordinates
@@ -743,9 +758,8 @@ window.addEventListener('load', () => {
     e.currentTarget.classList.remove(CSS_FLEET_PREDEPLOY)
     lastClickedFleetDiv = e.currentTarget
     rotateBtn.disabled = false
-    console.log('playableFleets::', playableFleets)
     
-    game.playerDivs.forEach( div => {
+    game.playerDivs.forEach(function(div){
       //clearPlayer1EventListeners()
       div.addEventListener('mouseover', predeployMouseover)
       div.addEventListener('mouseout', predeployMouseout)
@@ -754,12 +768,12 @@ window.addEventListener('load', () => {
   }
 
   // add event listners for ships
-  humanShipDivs.forEach( shipDiv => {
+  humanShipDivs.forEach(function(shipDiv){
     shipDiv.addEventListener('click', addMouseOverOutClickEventInGrid)
   })
 
   // rotate means we just need to switch the axis so mouseover, mouseout and click event listener will be reflected based on that
-  rotateBtn.addEventListener('click', () => {
+  rotateBtn.addEventListener('click', function(){
     switchAxis()
     playSoundById('axisRotate')
   }) 
