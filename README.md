@@ -1,3 +1,7 @@
+##### Update
+
+I noticed that Safari and other browser does not yet have ES6 syntax. So I have now removed all the array syntax (`=>`) and added back the tranditional `function()` with `bind(this)` for compatibility reasons.
+
 # Classic Battleship
 
 A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display.
@@ -82,6 +86,4 @@ This should more or less match human decision making for attacking the coordinat
 ## Caveats
 The game was meant to be played on desktop. Should the user wish to play the game on mobile, this is still fine. However, any mouseover effects won’t be available on touch screen device unless they **long press** and hold on the cell.
 
-The code uses ES6 arrow syntax for functions. I’ve noticed some version of Safari browser does not support that arrow syntax hence `div`s won’t even be generated. So Safari is completely off the table.
-
-Recommended browser: **Chrome**
+Recommended browser: **Chrome** or **Brave**
