@@ -4,7 +4,7 @@ I noticed that Safari and other browser does not yet have ES6 syntax. So I have 
 
 # Classic Battleship
 
-A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display.
+A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display. **Note that I was intentionally not using `display: grid`**. This was a Flexbox exercise for me.
 
 ## Design and concepts
 In my head, the concept was to make a command center briefcase like we see on the movies for this game. :joy: :joy: :joy:
