@@ -1,10 +1,10 @@
-##### Update
+#### Update
 
-I noticed that Safari and other browser does not yet have ES6 syntax. So I have now removed all the array syntax (`=>`) and added back the tranditional `function()` with `bind(this)` for compatibility reasons.
+I noticed that Safari and other browser does not yet support ES6 syntax. So I have now removed all the array syntax (`=>`) and added back the tranditional `function()` with `bind(this)` for compatibility reasons. And sounds seems to lag a bit on other browsers. 😔
 
 # Classic Battleship
 
-A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display. **Note that I was intentionally not using `display: grid`**. This was a Flexbox exercise for me.
+A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display. **Note that I was intentionally not using `display: grid`**. This was a Flexbox exercise project.
 
 ## Design and concepts
 In my head, the concept was to make a command center briefcase like we see on the movies for this game. :joy: :joy: :joy:
@@ -76,7 +76,11 @@ There are lots of improvements that could be done for the bot intelligence. Here
 This should more or less match human decision making for attacking the coordinates except for random attacks.
 
 ## Planned features
-* Redeploy the ships
+
+if I get around to it 🙃
+
+* Fix sound lagging on other browsers other than Chrome
+* Redeploy previous ships
 * More controls for mobile and touch screen
 * More responsive design for smaller design - tidying up the CSS a notch.
 * Allow the user to redeploy a ship in case the player made a mistake.
