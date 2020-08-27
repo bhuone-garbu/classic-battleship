@@ -6,6 +6,9 @@ I noticed that Safari and other browser does not yet support ES6 syntax. So I ha
 
 A browser based classic battleship game written in pure vanilla Javascript - using CSS/Flexbox for layout and display. **Note that I was intentionally not using `display: grid`**. This was a Flexbox exercise project.
 
+Available on github pages:
+https://bhuone-garbu.github.io/classic-battleship
+
 ## Design and concepts
 In my head, the concept was to make a command center briefcase like we see on the movies for this game. :joy: :joy: :joy:
 ![Command center suitcase](https://i.imgur.com/004i4KS.png)
